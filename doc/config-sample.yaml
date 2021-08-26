@@ -7,4 +7,5 @@ qb_username: your_qbittorrent_username
 qb_password: your_qbittorrent_password
 torrent_path: "./data/download/"
 leveldb_path: "./data/db/"
-water_mark: 1684525
+discount_water_mark: 50
+thread_water_mark: 1684525

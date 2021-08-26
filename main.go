@@ -10,7 +10,7 @@ func downloadInfoList(infoList []*dao.TorrentInfo) {
 	detail := module.NewDetailModule()
 	download := module.NewDownloader()
 	for _, info := range infoList {
-		if info.Crawled || info.TorrentID < dao.YAMLConfig.WaterMark {
+		if info.Crawled || info.TorrentID < dao.YAMLConfig.ThreadWaterMark || info.Discount < dao.YAMLConfig.DiscountWaterMark {
 			continue
 		}
 		form := detail.GetDetailFrom(info)
