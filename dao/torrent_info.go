@@ -32,7 +32,7 @@ type FilterOption func(*TorrentInfo) error
 
 func (p *TorrentInfo) ProcessTorrent(r *RawTorrentInfo) error {
 	if err := LoadTorrentInfoFromDB(r.Link, p); err != nil {
-		return err
+		log.Println(err)
 	}
 	// update the info
 	if err := p.applyFilter(
