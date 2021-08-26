@@ -17,6 +17,7 @@ type Config struct {
 	QBPassword  string
 	LevelDBPath string
 	TorrentPath string
+	WaterMark   int
 }
 
 var YAMLConfig *Config
@@ -54,6 +55,7 @@ func ReadYamlConfig(path string) error {
 		QBPassword:  conf["qb_password"].(string),
 		LevelDBPath: conf["leveldb_path"].(string),
 		TorrentPath: conf["torrent_path"].(string),
+		WaterMark:   conf["water_mark"].(int),
 	}
 	return nil
 }
