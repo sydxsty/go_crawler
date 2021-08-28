@@ -76,18 +76,6 @@ func (t *TorrentInfo) applyFilter(options ...FilterOption) error {
 	}
 	return nil
 }
-func discountFilter(r *RawTorrentInfo) FilterOption {
-	return func(p *TorrentInfo) error {
-		if strings.Contains(r.Discount, "free") {
-			p.Discount = 100
-		} else if strings.Contains(r.Discount, "dl50") {
-			p.Discount = 50
-		} else {
-			p.Discount = 0
-		}
-		return nil
-	}
-}
 
 func (t *TorrentInfo) LoadFromDB(link string) error {
 	value, err := TorrentInfoDBHandle.Get([]byte(link), nil)
@@ -175,6 +163,19 @@ func sizeFilter(r *RawTorrentInfo) FilterOption {
 		default:
 			log.Println("can not get torrent size")
 			return nil
+		}
+		return nil
+	}
+}
+
+func discountFilter(r *RawTorrentInfo) FilterOption {
+	return func(p *TorrentInfo) error {
+		if strings.Contains(r.Discount, "free") {
+			p.Discount = 100
+		} else if strings.Contains(r.Discount, "dl50") {
+			p.Discount = 50
+		} else {
+			p.Discount = 0
 		}
 		return nil
 	}
