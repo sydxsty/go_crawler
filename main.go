@@ -31,7 +31,7 @@ func downloadInfoList(infoList []*dao.TorrentInfo) {
 				info.Crawled = true
 				log.Println("downloading: ")
 				log.Println(info)
-				if err := dao.SaveTorrentInfoToDB(info); err != nil {
+				if err := info.SaveToDB(); err != nil {
 					log.Println(err)
 					continue
 				}

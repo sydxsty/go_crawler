@@ -30,29 +30,106 @@ type TorrentInfo struct {
 
 type FilterOption func(*TorrentInfo) error
 
-func (p *TorrentInfo) ProcessTorrent(r *RawTorrentInfo) error {
-	if err := LoadTorrentInfoFromDB(r.Link, p); err != nil {
+func NewAggregatedTorrentInfo(r *RawTorrentInfo) *TorrentInfo {
+	t := &TorrentInfo{}
+	if err := t.LoadFromDB(r.Link); err != nil {
+		if err := t.LoadFromRawTorrentInfo(r); err != nil {
+			return nil // error
+		}
+		if err := t.SaveToDB(); err != nil {
+			log.Println(err)
+		}
+		return t // raw only
+	}
+	if err := t.UpdateFromRawTorrentInfo(r); err != nil {
+		return t // db only
+	}
+	if err := t.SaveToDB(); err != nil {
 		log.Println(err)
 	}
-	// update the info
-	if err := p.applyFilter(
+	return t // db + raw
+}
+
+func (t *TorrentInfo) LoadFromRawTorrentInfo(r *RawTorrentInfo) error {
+	return t.applyFilter(
 		titleFilter(r),
 		linkFilter(r),
 		sizeFilter(r),
 		discountFilter(r),
 		hasCrawledFilter(r),
-	); err != nil {
-		return err
-	}
-	return SaveTorrentInfoToDB(p)
+	)
 }
 
-func (p *TorrentInfo) applyFilter(options ...FilterOption) error {
+func (t *TorrentInfo) UpdateFromRawTorrentInfo(r *RawTorrentInfo) error {
+	return t.applyFilter(
+		titleFilter(r),
+		discountFilter(r),
+	)
+}
+
+func (t *TorrentInfo) applyFilter(options ...FilterOption) error {
 	for _, f := range options {
-		err := f(p)
+		err := f(t)
 		if err != nil {
 			return err
 		}
+	}
+	return nil
+}
+func discountFilter(r *RawTorrentInfo) FilterOption {
+	return func(p *TorrentInfo) error {
+		if strings.Contains(r.Discount, "free") {
+			p.Discount = 100
+		} else if strings.Contains(r.Discount, "dl50") {
+			p.Discount = 50
+		} else {
+			p.Discount = 0
+		}
+		return nil
+	}
+}
+
+func (t *TorrentInfo) LoadFromDB(link string) error {
+	value, err := TorrentInfoDBHandle.Get([]byte(link), nil)
+	if err != nil {
+		return err
+	}
+	if err := json.Unmarshal(value, t); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (t *TorrentInfo) SaveToDB() error {
+	raw, err := json.Marshal(t)
+	if err != nil {
+		return err
+	}
+	if err := TorrentInfoDBHandle.Put([]byte(t.Link), raw, nil); err != nil {
+		return err
+	}
+	return nil
+}
+
+func LoadCookieFromDB() ([]*http.Cookie, error) {
+	var cookie []*http.Cookie
+	raw, err := TorrentInfoDBHandle.Get([]byte(YAMLConfig.CookiePath), nil)
+	if err != nil {
+		return nil, err
+	}
+	if err := json.Unmarshal(raw, &cookie); err != nil {
+		return nil, err
+	}
+	return cookie, nil
+}
+
+func SaveCookieToDB(cookie []*http.Cookie) error {
+	raw, err := json.Marshal(cookie)
+	if err != nil {
+		return err
+	}
+	if err := TorrentInfoDBHandle.Put([]byte(YAMLConfig.CookiePath), raw, nil); err != nil {
+		return err
 	}
 	return nil
 }
@@ -103,66 +180,8 @@ func sizeFilter(r *RawTorrentInfo) FilterOption {
 	}
 }
 
-func discountFilter(r *RawTorrentInfo) FilterOption {
-	return func(p *TorrentInfo) error {
-		if strings.Contains(r.Discount, "free") {
-			p.Discount = 100
-		} else if strings.Contains(r.Discount, "dl50") {
-			p.Discount = 50
-		} else {
-			p.Discount = 0
-		}
-		return nil
-	}
-}
-
 func hasCrawledFilter(r *RawTorrentInfo) FilterOption {
 	return func(p *TorrentInfo) error {
 		return nil
 	}
-}
-
-func LoadTorrentInfoFromDB(link string, info *TorrentInfo) error {
-	value, err := TorrentInfoDBHandle.Get([]byte(link), nil)
-	if err != nil {
-		return err
-	}
-	if err := json.Unmarshal(value, info); err != nil {
-		return err
-	}
-	return nil
-}
-
-func SaveTorrentInfoToDB(info *TorrentInfo) error {
-	raw, err := json.Marshal(info)
-	if err != nil {
-		return err
-	}
-	if err := TorrentInfoDBHandle.Put([]byte(info.Link), raw, nil); err != nil {
-		return err
-	}
-	return nil
-}
-
-func LoadCookieFromDB() ([]*http.Cookie, error) {
-	var cookie []*http.Cookie
-	raw, err := TorrentInfoDBHandle.Get([]byte(YAMLConfig.CookiePath), nil)
-	if err != nil {
-		return nil, err
-	}
-	if err := json.Unmarshal(raw, &cookie); err != nil {
-		return nil, err
-	}
-	return cookie, nil
-}
-
-func SaveCookieToDB(cookie []*http.Cookie) error {
-	raw, err := json.Marshal(cookie)
-	if err != nil {
-		return err
-	}
-	if err := TorrentInfoDBHandle.Put([]byte(YAMLConfig.CookiePath), raw, nil); err != nil {
-		return err
-	}
-	return nil
 }
