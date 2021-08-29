@@ -93,35 +93,27 @@ func (c *indexModuleImpl) GetForumList() map[string]string {
 }
 
 func (c *indexModuleImpl) indexAnalysis(node *NodeDecorator) *dao.TorrentInfo {
-	info := &dao.RawTorrentInfo{}
+	raw := &dao.RawTorrentInfo{}
 	// generate a detailed information of a torrent
-	info.Title = node.GetInnerNode(`.//a[@class="s xst"]`).GetString()
-	info.Link = node.GetInnerNode(`.//a[@class="s xst"]/@href`).GetString()
-	info.Size = node.GetInnerNode(`./td[3]`).GetString()
-	info.Discount = node.GetInnerNode(`.//a[@class="s xst"]/../img/@src`).GetString()
-	info.Signal = node.GetInnerNode(`.//strong/img/@src`).GetString()
-	info.Uploader = node.GetInnerNode(`./td[last()]/a`).GetString()
-	info.UploaderPage = node.GetInnerNode(`./td[last()]/a/@href`).GetString()
-	processedInfo := &dao.TorrentInfo{}
-	if err := processedInfo.ProcessTorrent(info); err != nil {
-		return nil
-	}
-	return processedInfo
+	raw.Title = node.GetInnerNode(`.//a[@class="s xst"]`).GetString()
+	raw.Link = node.GetInnerNode(`.//a[@class="s xst"]/@href`).GetString()
+	raw.Size = node.GetInnerNode(`./td[3]`).GetString()
+	raw.Discount = node.GetInnerNode(`.//a[@class="s xst"]/../img/@src`).GetString()
+	raw.Signal = node.GetInnerNode(`.//strong/img/@src`).GetString()
+	raw.Uploader = node.GetInnerNode(`./td[last()]/a`).GetString()
+	raw.UploaderPage = node.GetInnerNode(`./td[last()]/a/@href`).GetString()
+	return dao.NewAggregatedTorrentInfo(raw)
 }
 
 func (c *indexModuleImpl) forumAnalysis(node *NodeDecorator) *dao.TorrentInfo {
-	info := &dao.RawTorrentInfo{}
+	raw := &dao.RawTorrentInfo{}
 	// generate a detailed information of a torrent
-	info.Title = node.GetInnerNode(`.//a[@class="s xst"]`).GetString()
-	info.Link = node.GetInnerNode(`.//a[@class="s xst"]/@href`).GetString()
-	info.Size = node.GetInnerNode(`./td[3]`).GetString()
-	info.Discount = node.GetInnerNode(`.//a[@class="s xst"]/../img[last()]/@src`).GetString()
-	info.Signal = node.GetInnerNode(`./td[2]/img/@src`).GetString()
-	info.Uploader = node.GetInnerNode(`./td[last()]//a`).GetString()
-	info.UploaderPage = node.GetInnerNode(`./td[last()]//a/@href`).GetString()
-	processedInfo := &dao.TorrentInfo{}
-	if err := processedInfo.ProcessTorrent(info); err != nil {
-		return nil
-	}
-	return processedInfo
+	raw.Title = node.GetInnerNode(`.//a[@class="s xst"]`).GetString()
+	raw.Link = node.GetInnerNode(`.//a[@class="s xst"]/@href`).GetString()
+	raw.Size = node.GetInnerNode(`./td[3]`).GetString()
+	raw.Discount = node.GetInnerNode(`.//a[@class="s xst"]/../img[last()]/@src`).GetString()
+	raw.Signal = node.GetInnerNode(`./td[2]/img/@src`).GetString()
+	raw.Uploader = node.GetInnerNode(`./td[last()]//a`).GetString()
+	raw.UploaderPage = node.GetInnerNode(`./td[last()]//a/@href`).GetString()
+	return dao.NewAggregatedTorrentInfo(raw)
 }
