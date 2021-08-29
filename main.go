@@ -43,7 +43,9 @@ func downloadInfoList(infoList []*dao.TorrentInfo) {
 func main() {
 	// test case
 	t := module.NewBangumiModule()
-	t.GetAnimeNameByTag("5539ce09dd3d5c0b4e82f1f7")
+	var l []string
+	l = append(l, "548fe27ef892774b140ac6e8")
+	t.GetAnimeNameByTag(l)
 	return
 	c := module.NewIndexModule()
 	if dao.YAMLConfig.UseCookie {
