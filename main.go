@@ -42,6 +42,9 @@ func downloadInfoList(infoList []*dao.TorrentInfo) {
 
 func main() {
 	// test case
+	t := module.NewBangumiModule()
+	t.GetAnimeNameByTag("5539ce09dd3d5c0b4e82f1f7")
+	return
 	c := module.NewIndexModule()
 	if dao.YAMLConfig.UseCookie {
 		if err := c.LoadCookie(); err != nil {
@@ -53,6 +56,7 @@ func main() {
 			log.Fatal(err)
 		}
 	}
-	downloadInfoList(c.GetForum("forum-45-1.html"))
-	downloadInfoList(c.GetResourceIndex())
+	module.NewForumModule("21")
+	//downloadInfoList(c.GetForum("forum-45-1.html"))
+	//downloadInfoList(c.GetResourceIndex())
 }
