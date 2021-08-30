@@ -2,6 +2,7 @@ package module
 
 import (
 	"bytes"
+	"encoding/json"
 	"github.com/gocolly/colly/v2"
 	"goCrawler/dao"
 	"golang.org/x/text/encoding/simplifiedchinese"
@@ -35,6 +36,7 @@ type forumModuleImpl struct {
 
 	text         string // message
 	fieldID      string //field id
+	detail       string
 	fileName     string
 	postFileName string
 }
@@ -96,6 +98,7 @@ func (f *forumModuleImpl) PostMultiPart() error {
 	w.WriteField(UTF82GB2312("typeid"), UTF82GB2312(f.tid))
 	w.WriteField(UTF82GB2312("subject"), UTF82GB2312(f.subject))
 	note := `[quote]自动发种试运行，有问题请在github上提Issue` + "\n" + `[url=https://github.com/sydxsty/go_crawler/releases]https://github.com/sydxsty/go_crawler/releases[/url][/quote]`
+	note += f.detail
 	w.WriteField(UTF82GB2312("message"), UTF82GB2312(note+"\n"+f.text+"\n"))
 	w.WriteField(UTF82GB2312("readperm"), UTF82GB2312(""))
 	w.WriteField(UTF82GB2312("tags"), UTF82GB2312(""))
@@ -161,8 +164,22 @@ func (f *forumModuleImpl) UpdateWithTorrentInfo(info *dao.BangumiTorrentInfo) er
 	if info.Detail.Resolution != "" {
 		title += "[" + info.Detail.Resolution + "]"
 	}
-
+	form := func(v interface{}) string {
+		detail, _ := json.Marshal(v)
+		var out bytes.Buffer
+		if err := json.Indent(&out, detail, "", "\t"); err != nil {
+			return ""
+		}
+		return out.String()
+	}
 	f.subject = title
+	f.detail = "[code]\n"
+	f.detail += "Debug info:\n"
+	f.detail += "原种标题：" + info.Title + "\n"
+	f.detail += "种子信息：" + form(info.Detail) + "\n"
+	f.detail += "种子内容：" + form(info.Content) + "\n"
+	f.detail += "[/code]\n"
+
 	return nil
 }
 
@@ -183,6 +200,5 @@ func UTF82GB2312(s string) string {
 		}
 		covert += s3
 	}
-	log.Println(covert)
 	return covert
 }
