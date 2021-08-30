@@ -1,6 +1,7 @@
 package main
 
 import (
+	"goCrawler/controller"
 	"goCrawler/dao"
 	"goCrawler/module"
 	"log"
@@ -41,11 +42,12 @@ func downloadInfoList(infoList []*dao.TorrentInfo) {
 }
 
 func main() {
+
 	// test case
-	t := module.NewBangumiModule()
-	var l []string
-	l = append(l, "548fe27ef892774b140ac6e8")
-	t.GetAnimeNameByTag(l)
+	animeList := controller.GetLatestAnimeList()
+	for _, anime := range animeList {
+		controller.GetTorrentPTGenDetail(anime)
+	}
 	return
 	c := module.NewIndexModule()
 	if dao.YAMLConfig.UseCookie {

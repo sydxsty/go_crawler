@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"encoding/json"
 	"github.com/syndtr/goleveldb/leveldb"
 	"gopkg.in/yaml.v2"
 	"log"
@@ -22,7 +23,7 @@ type Config struct {
 }
 
 var YAMLConfig *Config
-var TorrentInfoDBHandle *leveldb.DB
+var dbHandle *leveldb.DB
 
 func init() {
 	err := ReadYamlConfig("./data/config.yaml")
@@ -30,7 +31,7 @@ func init() {
 		log.Fatal(err)
 		return
 	}
-	TorrentInfoDBHandle, err = leveldb.OpenFile(YAMLConfig.LevelDBPath, nil)
+	dbHandle, err = leveldb.OpenFile(YAMLConfig.LevelDBPath, nil)
 	if err != nil {
 		log.Fatal(err)
 		return
@@ -58,6 +59,28 @@ func ReadYamlConfig(path string) error {
 		TorrentPath:       conf["torrent_path"].(string),
 		ThreadWaterMark:   conf["thread_water_mark"].(int),
 		DiscountWaterMark: conf["discount_water_mark"].(int),
+	}
+	return nil
+}
+
+func LoadFromDB(uid string, data interface{}) error {
+	value, err := dbHandle.Get([]byte(uid), nil)
+	if err != nil {
+		return err
+	}
+	if err := json.Unmarshal(value, data); err != nil {
+		return err
+	}
+	return nil
+}
+
+func SaveToDB(uid string, data interface{}) error {
+	raw, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+	if err := dbHandle.Put([]byte(uid), raw, nil); err != nil {
+		return err
 	}
 	return nil
 }

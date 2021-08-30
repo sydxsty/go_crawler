@@ -78,30 +78,16 @@ func (t *TorrentInfo) applyFilter(options ...FilterOption) error {
 }
 
 func (t *TorrentInfo) LoadFromDB(link string) error {
-	value, err := TorrentInfoDBHandle.Get([]byte(link), nil)
-	if err != nil {
-		return err
-	}
-	if err := json.Unmarshal(value, t); err != nil {
-		return err
-	}
-	return nil
+	return LoadFromDB(link, t)
 }
 
 func (t *TorrentInfo) SaveToDB() error {
-	raw, err := json.Marshal(t)
-	if err != nil {
-		return err
-	}
-	if err := TorrentInfoDBHandle.Put([]byte(t.Link), raw, nil); err != nil {
-		return err
-	}
-	return nil
+	return SaveToDB(t.Link, t)
 }
 
 func LoadCookieFromDB() ([]*http.Cookie, error) {
 	var cookie []*http.Cookie
-	raw, err := TorrentInfoDBHandle.Get([]byte(YAMLConfig.CookiePath), nil)
+	raw, err := dbHandle.Get([]byte(YAMLConfig.CookiePath), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -116,7 +102,7 @@ func SaveCookieToDB(cookie []*http.Cookie) error {
 	if err != nil {
 		return err
 	}
-	if err := TorrentInfoDBHandle.Put([]byte(YAMLConfig.CookiePath), raw, nil); err != nil {
+	if err := dbHandle.Put([]byte(YAMLConfig.CookiePath), raw, nil); err != nil {
 		return err
 	}
 	return nil
