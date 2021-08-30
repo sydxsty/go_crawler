@@ -95,16 +95,16 @@ func (f *forumModuleImpl) PostMultiPart() error {
 	w.WriteField(UTF82GB2312("specialextra"), UTF82GB2312(f.specialExtra))
 	w.WriteField(UTF82GB2312("typeid"), UTF82GB2312(f.tid))
 	w.WriteField(UTF82GB2312("subject"), UTF82GB2312(f.subject))
-	w.WriteField(UTF82GB2312("message"), UTF82GB2312(f.text+"\n"))
-	//w.WriteField(UTF82GB2312("message"), UTF82GB2312(""))
+	note := `[quote]自动发种试运行，有问题请在github上提Issue` + "\n" + `[url=https://github.com/sydxsty/go_crawler/releases]https://github.com/sydxsty/go_crawler/releases[/url][/quote]`
+	w.WriteField(UTF82GB2312("message"), UTF82GB2312(note+"\n"+f.text+"\n"))
 	w.WriteField(UTF82GB2312("readperm"), UTF82GB2312(""))
 	w.WriteField(UTF82GB2312("tags"), UTF82GB2312(""))
 	w.WriteField(UTF82GB2312("allownoticeauthor"), UTF82GB2312("1"))
 	w.WriteField(UTF82GB2312("usesig"), UTF82GB2312("1"))
 	w.WriteField(UTF82GB2312("save"), UTF82GB2312(""))
-	w.WriteField(UTF82GB2312("tid"), UTF82GB2312("1684792"))
-	w.WriteField(UTF82GB2312("pid"), UTF82GB2312("27923033"))
-	w.WriteField(UTF82GB2312("fid"), UTF82GB2312("44"))
+	//w.WriteField(UTF82GB2312("tid"), UTF82GB2312("1684792"))
+	//w.WriteField(UTF82GB2312("pid"), UTF82GB2312("27923033"))
+	//w.WriteField(UTF82GB2312("fid"), UTF82GB2312("44"))
 
 	fileData, _ := ioutil.ReadFile(dao.YAMLConfig.TorrentPath + f.fileName)
 	pa, _ := w.CreateFormFile(UTF82GB2312("torrent"), UTF82GB2312(f.postFileName+".torrent"))
@@ -123,8 +123,8 @@ func (f *forumModuleImpl) PostMultiPart() error {
 		log.Println(r.Body)
 	})
 	if err := collector.PostRaw(
-		f.getAbsoluteURL(`forum.php?mod=post&action=edit&extra=&editsubmit=yes`),
-		//f.getAbsoluteURL(`forum.php?mod=post&action=newthread&fid=` + f.fieldID + `&extra=&topicsubmit=yes`),
+		//f.getAbsoluteURL(`forum.php?mod=post&action=edit&extra=&editsubmit=yes`),
+		f.getAbsoluteURL(`forum.php?mod=post&action=newthread&fid=`+f.fieldID+`&extra=&topicsubmit=yes`),
 		body.Bytes()); err != nil {
 		return err
 	}
