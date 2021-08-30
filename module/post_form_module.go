@@ -5,10 +5,10 @@ import (
 	"github.com/gocolly/colly/v2"
 	"goCrawler/dao"
 	"golang.org/x/text/encoding/simplifiedchinese"
-	"golang.org/x/text/transform"
 	"io/ioutil"
 	"log"
 	"mime/multipart"
+	"strings"
 )
 
 type ForumModule interface {
@@ -33,9 +33,10 @@ type forumModuleImpl struct {
 	torrentFileName  string
 	torrentFileBytes []byte
 
-	text     string // message
-	fieldID  string //field id
-	fileName string
+	text         string // message
+	fieldID      string //field id
+	fileName     string
+	postFileName string
 }
 
 func NewForumModule(fid string, fileName string) ForumModule {
@@ -86,22 +87,27 @@ func (f *forumModuleImpl) PostMultiPart() error {
 	// we do not clone controller here
 	body := new(bytes.Buffer)
 	w := multipart.NewWriter(body)
-	w.WriteField("formhash", UTF82GB2312(f.formHash))
-	w.WriteField("posttime", UTF82GB2312(f.postTime))
-	w.WriteField("wysiwyg", UTF82GB2312(f.wysiwyg))
-	w.WriteField("special", UTF82GB2312(f.special))
-	w.WriteField("specialextra", UTF82GB2312(f.specialExtra))
-	w.WriteField("typeid", UTF82GB2312(f.tid))
-	w.WriteField("subject", UTF82GB2312(f.subject))
-	w.WriteField("message", UTF82GB2312(f.text))
-	w.WriteField("readperm", UTF82GB2312(""))
-	w.WriteField("tags", UTF82GB2312(""))
-	w.WriteField("allownoticeauthor", UTF82GB2312("1"))
-	w.WriteField("usesig", UTF82GB2312("1"))
-	w.WriteField("save", UTF82GB2312(""))
+
+	w.WriteField(UTF82GB2312("formhash"), UTF82GB2312(f.formHash))
+	w.WriteField(UTF82GB2312("posttime"), UTF82GB2312(f.postTime))
+	w.WriteField(UTF82GB2312("wysiwyg"), UTF82GB2312(f.wysiwyg))
+	w.WriteField(UTF82GB2312("special"), UTF82GB2312(f.special))
+	w.WriteField(UTF82GB2312("specialextra"), UTF82GB2312(f.specialExtra))
+	w.WriteField(UTF82GB2312("typeid"), UTF82GB2312(f.tid))
+	w.WriteField(UTF82GB2312("subject"), UTF82GB2312(f.subject))
+	w.WriteField(UTF82GB2312("message"), UTF82GB2312(f.text+"\n"))
+	//w.WriteField(UTF82GB2312("message"), UTF82GB2312(""))
+	w.WriteField(UTF82GB2312("readperm"), UTF82GB2312(""))
+	w.WriteField(UTF82GB2312("tags"), UTF82GB2312(""))
+	w.WriteField(UTF82GB2312("allownoticeauthor"), UTF82GB2312("1"))
+	w.WriteField(UTF82GB2312("usesig"), UTF82GB2312("1"))
+	w.WriteField(UTF82GB2312("save"), UTF82GB2312(""))
+	w.WriteField(UTF82GB2312("tid"), UTF82GB2312("1684792"))
+	w.WriteField(UTF82GB2312("pid"), UTF82GB2312("27923033"))
+	w.WriteField(UTF82GB2312("fid"), UTF82GB2312("44"))
 
 	fileData, _ := ioutil.ReadFile(dao.YAMLConfig.TorrentPath + f.fileName)
-	pa, _ := w.CreateFormFile("torrent", f.fileName)
+	pa, _ := w.CreateFormFile(UTF82GB2312("torrent"), UTF82GB2312(f.postFileName+".torrent"))
 	if _, err := pa.Write(fileData); err != nil {
 		log.Fatal(err)
 	}
@@ -117,7 +123,7 @@ func (f *forumModuleImpl) PostMultiPart() error {
 		log.Println(r.Body)
 	})
 	if err := collector.PostRaw(
-		f.getAbsoluteURL(`forum.php?mod=post&action=reply&fid=44&tid=1684795&extra=&replysubmit=yes`),
+		f.getAbsoluteURL(`forum.php?mod=post&action=edit&extra=&editsubmit=yes`),
 		//f.getAbsoluteURL(`forum.php?mod=post&action=newthread&fid=` + f.fieldID + `&extra=&topicsubmit=yes`),
 		body.Bytes()); err != nil {
 		return err
@@ -127,6 +133,7 @@ func (f *forumModuleImpl) PostMultiPart() error {
 
 func (f *forumModuleImpl) UpdateWithTorrentInfo(info *dao.BangumiTorrentInfo) error {
 	f.tid = f.tidList["连载动画"]
+	f.postFileName = info.Title
 	if info.Detail.TorrentChsName == "" {
 		log.Fatal("chinese name empty")
 	}
@@ -165,10 +172,17 @@ func (f *forumModuleImpl) SetText(text string) error {
 }
 
 func UTF82GB2312(s string) string {
-	reader := transform.NewReader(bytes.NewReader([]byte(s)), simplifiedchinese.GB18030.NewEncoder())
-	d, e := ioutil.ReadAll(reader)
-	if e != nil {
-		return ""
+	var covert string
+	for _, sub := range strings.Split(s, "\n") {
+		s3, err := simplifiedchinese.GBK.NewEncoder().String(sub)
+		if err != nil {
+			log.Println(err)
+		}
+		if covert != "" {
+			covert += "\n"
+		}
+		covert += s3
 	}
-	return string(d)
+	log.Println(covert)
+	return covert
 }

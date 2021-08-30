@@ -33,12 +33,12 @@ func GetLatestAnimeList() []*dao.BangumiTorrentInfo {
 func GetTorrentPTGenDetail(info *dao.BangumiTorrentInfo) map[string]interface{} {
 	ptGen := module.NewPTGen()
 	var result map[string]string
-	if len(info.Detail.TorrentChsName) != 0 {
+	if len(info.Detail.TorrentJpnName) != 0 {
+		result = ptGen.GetBangumiLinkByName(info.Detail.TorrentJpnName)
+	} else if len(info.Detail.TorrentChsName) != 0 {
 		result = ptGen.GetBangumiLinkByName(info.Detail.TorrentChsName)
 	} else if len(info.Detail.TorrentEngName) != 0 {
 		result = ptGen.GetBangumiLinkByName(info.Detail.TorrentEngName)
-	} else if len(info.Detail.TorrentJpnName) != 0 {
-		result = ptGen.GetBangumiLinkByName(info.Detail.TorrentJpnName)
 	} else {
 		log.Println("torrent name is empty")
 	}
