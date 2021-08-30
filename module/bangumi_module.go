@@ -1,11 +1,14 @@
 package module
 
 import (
+	"bytes"
 	"encoding/json"
 	"github.com/gocolly/colly/v2"
 	"goCrawler/dao"
+	"io"
 	"log"
 	"net/url"
+	"os"
 )
 
 type Bangumi struct {
@@ -117,4 +120,28 @@ func (b *Bangumi) GetRecentTorrentList() []interface{} {
 		return nil
 	}
 	return response
+}
+
+func (b *Bangumi) DownloadTorrent(t *dao.BangumiTorrentInfo) {
+	path := dao.YAMLConfig.TorrentPath
+	fileName := t.InfoHash + ".torrent"
+	downloader := b.getClonedCollector()
+	downloader.OnResponse(func(r *colly.Response) {
+		log.Printf("download --> %s", path+fileName)
+		f, err := os.Create(path + fileName)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		if _, err := io.Copy(f, bytes.NewReader(r.Body)); err != nil {
+			log.Println(err)
+		}
+		if err := f.Close(); err != nil {
+			log.Println(err)
+		}
+	})
+	if err := downloader.Visit(b.getAbsoluteURL(t.Detail.TorrentDownloadURL)); err != nil {
+		log.Fatal(err)
+	}
+
 }

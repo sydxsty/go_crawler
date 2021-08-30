@@ -38,7 +38,7 @@ func NewBangumiTorrentInfoFromMap(raw map[string]interface{}) *BangumiTorrentInf
 		log.Fatal("cannot get torrent id")
 	}
 	if b.TeamId, ok = raw["team_id"].(string); !ok {
-		log.Fatal("cannot get team tags")
+		b.TeamId = "Unknown"
 	}
 	if b.TagIds, ok = raw["tag_ids"].([]interface{}); !ok {
 		log.Fatal("cannot get torrent tags")
@@ -63,9 +63,9 @@ func (b *BangumiTorrentInfo) GenerateTorrentDetail(miscList []map[string]interfa
 				switch misc["type"] {
 				case "bangumi":
 					translate := misc["locale"].(map[string]interface{})
-					d.TorrentChsName = translate["zh_cn"].(string)
-					d.TorrentEngName = translate["en"].(string)
-					d.TorrentJpnName = translate["ja"].(string)
+					d.TorrentChsName, _ = translate["zh_cn"].(string)
+					d.TorrentEngName, _ = translate["en"].(string)
+					d.TorrentJpnName, _ = translate["ja"].(string)
 				case "team":
 					d.TeamName = misc["name"].(string)
 				case "resolution":

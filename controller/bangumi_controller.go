@@ -43,7 +43,8 @@ func GetTorrentPTGenDetail(info *dao.BangumiTorrentInfo) map[string]interface{} 
 		log.Println("torrent name is empty")
 	}
 	for _, v := range result {
-		return ptGen.GetBangumiDetailByLink(v)
+		ptResult := ptGen.GetBangumiDetailByLink(v)
+		return ptResult
 	}
 	return nil
 }

@@ -42,13 +42,6 @@ func downloadInfoList(infoList []*dao.TorrentInfo) {
 }
 
 func main() {
-
-	// test case
-	animeList := controller.GetLatestAnimeList()
-	for _, anime := range animeList {
-		controller.GetTorrentPTGenDetail(anime)
-	}
-	return
 	c := module.NewIndexModule()
 	if dao.YAMLConfig.UseCookie {
 		if err := c.LoadCookie(); err != nil {
@@ -60,7 +53,19 @@ func main() {
 			log.Fatal(err)
 		}
 	}
-	module.NewForumModule("21")
+	// test case
+	animeList := controller.GetLatestAnimeList()
+	for _, anime := range animeList {
+		if detail := controller.GetTorrentPTGenDetail(anime); detail != nil {
+			t := module.NewBangumiModule()
+			t.DownloadTorrent(anime)
+			m := module.NewForumModule("44", anime.InfoHash+".torrent")
+			m.UpdateWithTorrentInfo(anime)
+			m.SetText(detail["format"].(string))
+			m.PostMultiPart()
+		}
+	}
 	//downloadInfoList(c.GetForum("forum-45-1.html"))
 	//downloadInfoList(c.GetResourceIndex())
+	return
 }
