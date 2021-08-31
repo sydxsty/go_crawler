@@ -122,9 +122,7 @@ func (b *Bangumi) GetRecentTorrentList() []interface{} {
 	return response
 }
 
-func (b *Bangumi) DownloadTorrent(t *dao.BangumiTorrentInfo) {
-	path := dao.YAMLConfig.TorrentPath
-	fileName := t.InfoHash + ".torrent"
+func (b *Bangumi) DownloadTorrentFromUrl(path string, fileName string, url string) {
 	downloader := b.getClonedCollector()
 	downloader.OnResponse(func(r *colly.Response) {
 		log.Printf("download --> %s", path+fileName)
@@ -140,7 +138,7 @@ func (b *Bangumi) DownloadTorrent(t *dao.BangumiTorrentInfo) {
 			log.Println(err)
 		}
 	})
-	if err := downloader.Visit(b.getAbsoluteURL(t.Detail.TorrentDownloadURL)); err != nil {
+	if err := downloader.Visit(b.getAbsoluteURL(url)); err != nil {
 		log.Fatal(err)
 	}
 

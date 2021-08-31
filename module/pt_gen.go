@@ -3,6 +3,7 @@ package module
 import (
 	"encoding/json"
 	"github.com/gocolly/colly/v2"
+	"goCrawler/dao"
 	"log"
 	"net/url"
 )
@@ -35,6 +36,9 @@ func (p *PTGen) getClonedCollector() *colly.Collector {
 }
 
 func (p *PTGen) GetBangumiLinkByName(name string) map[string]string {
+	if name == "" {
+		return nil
+	}
 	collector := p.getClonedCollector()
 	var response map[string]interface{}
 	collector.OnResponse(func(r *colly.Response) {
@@ -45,19 +49,28 @@ func (p *PTGen) GetBangumiLinkByName(name string) map[string]string {
 	if err := collector.Visit(p.getAbsoluteURL(`/?search=` + name + `&source=bangumi`)); err != nil {
 		return nil
 	}
+	respData, ok := response["data"].([]interface{})
+	if !ok {
+		return nil
+	}
 	linkMap := make(map[string]string)
-	for _, node := range response["data"].([]interface{}) {
+	for _, node := range respData {
 		unmarshalNode := node.(map[string]interface{})
 		if unmarshalNode["subtype"].(string) == "动画/二次元番" {
 			linkMap[unmarshalNode["title"].(string)] = unmarshalNode["link"].(string)
+			break
 		}
 	}
 	return linkMap
 }
 
 func (p *PTGen) GetBangumiDetailByLink(link string) map[string]interface{} {
-	collector := p.getClonedCollector()
 	var response map[string]interface{}
+	// load from buffer
+	if err := dao.LoadFromDB("pt_gen_link_"+link, &response); err == nil {
+		return response
+	}
+	collector := p.getClonedCollector()
 	collector.OnResponse(func(r *colly.Response) {
 		if err := json.Unmarshal(r.Body, &response); err != nil {
 			log.Fatal(err)
@@ -65,6 +78,12 @@ func (p *PTGen) GetBangumiDetailByLink(link string) map[string]interface{} {
 	})
 	if err := collector.Visit(p.getAbsoluteURL(`/?url=` + link)); err != nil {
 		return nil
+	}
+	if response != nil {
+		// save to buffer
+		if err := dao.SaveToDB("pt_gen_link_"+link, response); err != nil {
+			return nil
+		}
 	}
 	return response
 }

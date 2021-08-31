@@ -1,10 +1,14 @@
 package module
 
 import (
+	"bytes"
+	"errors"
 	"github.com/gocolly/colly/v2"
 	"goCrawler/dao"
+	"io"
 	"log"
 	"net/url"
+	"os"
 	"strings"
 )
 
@@ -12,6 +16,8 @@ type ScraperModule interface {
 	Login(username string, password string)
 	SaveCookie() error
 	LoadCookie() error
+	DownloadTorrentFromNestedURL(link string, fileName string, path string) error
+	DownloadTorrentFromResponseBody(r *colly.Response, fileName string, path string) error
 }
 
 type scraperModuleImpl struct {
@@ -87,4 +93,50 @@ func (b *scraperModuleImpl) getClonedCollector() *colly.Collector {
 		r.Headers.Set("Accept-Language", "zh-CN,zh;q=0.9")
 	})
 	return clone
+}
+
+func (b *scraperModuleImpl) DownloadTorrentFromNestedURL(link string, fileName string, path string) error {
+	collector := b.getClonedCollector()
+	var response *colly.Response
+	collector.OnResponse(func(r *colly.Response) {
+		response = r
+	})
+	if err := collector.Visit(b.getAbsoluteURL(link)); err != nil {
+		return err
+	}
+	return b.DownloadTorrentFromResponseBody(response, fileName, path)
+}
+
+func (b *scraperModuleImpl) DownloadTorrentFromResponseBody(r *colly.Response, fileName string, path string) error {
+	var actualUrl string
+	node, err := NewNodeFromBytes(r.Body)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	actualUrl = node.GetInnerNode(`//*[@class="alert_btnleft"]/a/@href`).GetString()
+
+	if actualUrl != "" {
+		downloader := b.getClonedCollector()
+		downloader.OnResponse(func(r *colly.Response) {
+			log.Printf("download --> %s", path+fileName)
+			f, err := os.Create(path + fileName)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			if _, err := io.Copy(f, bytes.NewReader(r.Body)); err != nil {
+				log.Println(err)
+			}
+			if err := f.Close(); err != nil {
+				log.Println(err)
+			}
+		})
+		if err := downloader.Visit(b.getAbsoluteURL(actualUrl)); err != nil {
+			log.Fatal(err)
+		}
+		return nil
+	} else {
+		return errors.New("url not found")
+	}
 }

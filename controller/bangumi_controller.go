@@ -31,20 +31,42 @@ func GetLatestAnimeList() []*dao.BangumiTorrentInfo {
 }
 
 func GetTorrentPTGenDetail(info *dao.BangumiTorrentInfo) map[string]interface{} {
+	result := SearchWithPTGen(info)
 	ptGen := module.NewPTGen()
-	var result map[string]string
-	if len(info.Detail.TorrentJpnName) != 0 {
-		result = ptGen.GetBangumiLinkByName(info.Detail.TorrentJpnName)
-	} else if len(info.Detail.TorrentChsName) != 0 {
-		result = ptGen.GetBangumiLinkByName(info.Detail.TorrentChsName)
-	} else if len(info.Detail.TorrentEngName) != 0 {
-		result = ptGen.GetBangumiLinkByName(info.Detail.TorrentEngName)
-	} else {
-		log.Println("torrent name is empty")
-	}
 	for _, v := range result {
-		ptResult := ptGen.GetBangumiDetailByLink(v)
-		return ptResult
+		return ptGen.GetBangumiDetailByLink(v)
 	}
 	return nil
+}
+
+func SearchWithPTGen(info *dao.BangumiTorrentInfo) map[string]string {
+	var result map[string]string
+	if len(info.Detail.TorrentChsName) != 0 {
+		if err := dao.LoadFromDB("ptgen_error_name_"+info.Detail.TorrentChsName, &result); err == nil {
+			return nil
+		}
+		if err := dao.LoadFromDB("ptgen_info_name_"+info.Detail.TorrentChsName, &result); err == nil {
+			return result
+		}
+	}
+	ptGen := module.NewPTGen()
+	if result == nil {
+		result = ptGen.GetBangumiLinkByName(info.Detail.TorrentJpnName)
+	}
+	if result == nil {
+		result = ptGen.GetBangumiLinkByName(info.Detail.TorrentChsName)
+	}
+	if result == nil {
+		result = ptGen.GetBangumiLinkByName(info.Detail.TorrentEngName)
+	}
+	if result == nil || len(result) == 0 {
+		log.Println("torrent name is empty")
+		dao.SaveToDB("ptgen_error_name_"+info.Detail.TorrentChsName, result)
+		return nil
+	} else {
+		if len(info.Detail.TorrentChsName) != 0 {
+			dao.SaveToDB("ptgen_info_name_"+info.Detail.TorrentChsName, result)
+		}
+		return result
+	}
 }

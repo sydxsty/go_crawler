@@ -14,7 +14,7 @@ import (
 
 type ForumModule interface {
 	ScraperModule
-	PostMultiPart() error
+	PostMultiPart() (*colly.Response, error)
 	UpdateWithTorrentInfo(info *dao.BangumiTorrentInfo) error
 	SetText(text string) error
 }
@@ -84,7 +84,7 @@ func NewForumModule(fid string, fileName string) ForumModule {
 	return c
 }
 
-func (f *forumModuleImpl) PostMultiPart() error {
+func (f *forumModuleImpl) PostMultiPart() (*colly.Response, error) {
 	collector := f.getClonedCollector()
 	// we do not clone controller here
 	body := new(bytes.Buffer)
@@ -105,9 +105,6 @@ func (f *forumModuleImpl) PostMultiPart() error {
 	w.WriteField(UTF82GB2312("allownoticeauthor"), UTF82GB2312("1"))
 	w.WriteField(UTF82GB2312("usesig"), UTF82GB2312("1"))
 	w.WriteField(UTF82GB2312("save"), UTF82GB2312(""))
-	//w.WriteField(UTF82GB2312("tid"), UTF82GB2312("1684792"))
-	//w.WriteField(UTF82GB2312("pid"), UTF82GB2312("27923033"))
-	//w.WriteField(UTF82GB2312("fid"), UTF82GB2312("44"))
 
 	fileData, _ := ioutil.ReadFile(dao.YAMLConfig.TorrentPath + f.fileName)
 	pa, _ := w.CreateFormFile(UTF82GB2312("torrent"), UTF82GB2312(f.postFileName+".torrent"))
@@ -122,16 +119,16 @@ func (f *forumModuleImpl) PostMultiPart() error {
 		r.Headers.Set("Content-Type", w.FormDataContentType())
 
 	})
+	var response *colly.Response
 	collector.OnResponse(func(r *colly.Response) {
-		log.Println(r.Body)
+		response = r
 	})
 	if err := collector.PostRaw(
-		//f.getAbsoluteURL(`forum.php?mod=post&action=edit&extra=&editsubmit=yes`),
 		f.getAbsoluteURL(`forum.php?mod=post&action=newthread&fid=`+f.fieldID+`&extra=&topicsubmit=yes`),
 		body.Bytes()); err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return response, nil
 }
 
 func (f *forumModuleImpl) UpdateWithTorrentInfo(info *dao.BangumiTorrentInfo) error {

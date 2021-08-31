@@ -68,7 +68,8 @@ func LoadFromDB(uid string, data interface{}) error {
 	if err != nil {
 		return err
 	}
-	if err := json.Unmarshal(value, data); err != nil {
+	if err = json.Unmarshal(value, data); err != nil {
+		log.Println(err)
 		return err
 	}
 	return nil
