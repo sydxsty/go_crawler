@@ -4,6 +4,7 @@ import (
 	"goCrawler/dao"
 	"goCrawler/module"
 	"log"
+	"time"
 )
 
 func GetListByForumName(nameList ...string) []*dao.TorrentInfo {
@@ -56,6 +57,7 @@ func CrawlBangumiInfo() {
 						Link: response.Request.URL.Path,
 					}
 					downloadTorrentByInfo(info)
+					log.Println("post torrent success")
 				}
 			} else {
 				// else, download it from bgm, and add to bittorrent
@@ -64,13 +66,17 @@ func CrawlBangumiInfo() {
 				if err := d.AddTorrentToBitTorrent(dao.YAMLConfig.TorrentPath, anime.InfoHash+".torrent"); err != nil {
 					log.Fatal(err)
 				}
+				log.Println("download torrent from bangumi")
 			}
+			log.Println("success, sleep 5sec to continue")
+			time.Sleep(time.Second * 5)
 		} else {
 			// we can not get torrent detail
-			log.Println("error get torrent detail")
-			log.Println(anime)
+			log.Println("error get torrent detail: " + anime.Title)
+			time.Sleep(time.Second * 2)
 		}
 	}
+	log.Println("all torrent finished scanning, return")
 	return
 }
 

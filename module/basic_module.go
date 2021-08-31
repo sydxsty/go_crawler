@@ -32,9 +32,9 @@ func init() {
 	d, _ := url.Parse("http://[2001:da8:9000::232]")
 	basicModule.domain = d
 	basicModule.collector = colly.NewCollector()
-	if err := basicModule.collector.SetProxy("http://127.0.0.1:8888"); err != nil {
-		log.Fatal(err)
-	}
+	//if err := basicModule.collector.SetProxy("http://127.0.0.1:8888"); err != nil {
+	//	log.Fatal(err)
+	//}
 	basicModule.collector.UserAgent = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 UBrowser/6.2.4098.3 Safari/537.36"
 }
 
