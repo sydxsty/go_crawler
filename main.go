@@ -20,8 +20,13 @@ func main() {
 			log.Fatal(err)
 		}
 	}
-	controller.DownloadTorrentByInfoList(c.GetForum("forum-45-1.html"))
-	controller.DownloadTorrentByInfoList(c.GetResourceIndex())
+	for {
+		log.Println("crawling film(forum-45-1) and resource index")
+		controller.DownloadTorrentByInfoList(c.GetForum("forum-45-1.html"))
+		controller.DownloadTorrentByInfoList(c.GetResourceIndex())
+		log.Println("sleep 600 sec to continue")
+		time.Sleep(time.Second * 600)
+	}
 }
 
 func bangumiCrawler() {
