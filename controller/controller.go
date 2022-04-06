@@ -139,8 +139,8 @@ func downloadTorrentByInfo(info *dao.TorrentInfo) {
 	}
 }
 
-// apply filter here
-func downloadTorrentByInfoList(infoList []*dao.TorrentInfo) {
+// DownloadTorrentByInfoList apply filter here
+func DownloadTorrentByInfoList(infoList []*dao.TorrentInfo) {
 	for _, info := range infoList {
 		if info.Crawled || info.TorrentID < dao.YAMLConfig.ThreadWaterMark || info.Discount < dao.YAMLConfig.DiscountWaterMark {
 			continue
