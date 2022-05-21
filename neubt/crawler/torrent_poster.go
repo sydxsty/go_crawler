@@ -6,7 +6,7 @@ import (
 	"crawler/neubt/html"
 	"errors"
 	"github.com/gocolly/colly/v2"
-	"golang.org/x/text/encoding/simplifiedchinese"
+	"github.com/gogf/gf/v2/encoding/gcharset"
 	"log"
 	"mime/multipart"
 	"strings"
@@ -177,16 +177,9 @@ func (t *TorrentPosterImpl) PostTorrentMultiPart(data []byte) (string, error) {
 }
 
 func UTF82GB2312(s string) string {
-	var covert string
-	for _, sub := range strings.Split(s, "\n") {
-		s3, err := simplifiedchinese.GBK.NewEncoder().String(sub)
-		if err != nil {
-			log.Println(err)
-		}
-		if covert != "" {
-			covert += "\n"
-		}
-		covert += s3
+	covert, err := gcharset.UTF8To("GBK", s)
+	if err != nil {
+		log.Fatalln(err)
 	}
 	return covert
 }
