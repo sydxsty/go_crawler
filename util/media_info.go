@@ -19,7 +19,7 @@ func GetMediaInfo(execFileDir, mediaPath, mediaName string) (string, error) {
 
 	var result string
 	callback := func(str string) error {
-		result += strings.ReplaceAll(str, mediaPath, "") + "\n"
+		result += strings.ReplaceAll(str, mediaPath, "")
 		return nil
 	}
 	err := ExecCmd(`./`, filepath.Join(execFileDir, `mediainfo`), []string{filepath.Join(mediaPath, mediaName)}, callback)
@@ -30,9 +30,9 @@ func GetMediaInfo(execFileDir, mediaPath, mediaName string) (string, error) {
 	return result, nil
 }
 
-func ExecCmd(dir string, cmdStr string, params []string, callback func(string) error) error {
+func ExecCmd(dir, cmdStr string, params []string, callback func(string) error) error {
 	cmd := exec.Command(cmdStr, params...)
-	log.Println("CmdAndChangeDirToFile", dir, cmd.Args)
+	log.Println("Exec params", dir, cmd.Args)
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		return errors.Wrap(err, "cmd.StdoutPipe err")

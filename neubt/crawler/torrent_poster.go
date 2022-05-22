@@ -24,6 +24,7 @@ type TorrentPoster interface {
 	SetPostFileName(name string)
 	// SetPTGENContent set content
 	SetPTGENContent(text string)
+	SetMediaInfoContent(text string)
 	SetCommentContent(texts ...string)
 }
 
@@ -40,10 +41,11 @@ type TorrentPosterImpl struct {
 	subject      string // title of the torrent
 	tid          string // type id
 
-	fieldID      string // field id, set in NewTorrentPoster
-	genTxt       string // main message, from pt-gen
-	comment      string // header message, torrent detail
-	postFileName string // the torrent name showed in forum
+	fieldID       string // field id, set in NewTorrentPoster
+	genTxt        string // main message, from pt-gen
+	mediaInfoText string // media info
+	comment       string // header message, torrent detail
+	postFileName  string // the torrent name showed in forum
 }
 
 func (t *TorrentPosterImpl) SetTid(tid string) bool {
@@ -78,6 +80,10 @@ func (t *TorrentPosterImpl) SetPostFileName(name string) {
 
 func (t *TorrentPosterImpl) SetPTGENContent(text string) {
 	t.genTxt = text
+}
+
+func (t *TorrentPosterImpl) SetMediaInfoContent(text string) {
+	t.mediaInfoText = "[code] " + text + " [/code]"
 }
 
 func (t *TorrentPosterImpl) SetCommentContent(texts ...string) {
@@ -132,7 +138,7 @@ func (t *TorrentPosterImpl) SetTitle(pieces ...string) {
 
 func (t *TorrentPosterImpl) getMessageBody() string {
 	note := `[quote]自动发种试运行，有问题请在github上提Issue` + "\n" + `[url=https://github.com/sydxsty/go_crawler/releases]https://github.com/sydxsty/go_crawler/releases[/url][/quote]`
-	return note + t.comment + "\n" + t.genTxt + "\n"
+	return note + t.comment + "\n" + t.genTxt + "\n" + t.mediaInfoText + "\n"
 }
 
 func (t *TorrentPosterImpl) PostTorrentMultiPart(data []byte) (string, error) {

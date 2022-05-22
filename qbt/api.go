@@ -308,7 +308,7 @@ func (client *Client) Preferences() (prefs Preferences, err error) {
 //SetPreferences of the qbittorrent client
 func (client *Client) SetPreferences() (prefsSet bool, err error) {
 	resp, err := client.post("api/v2/app/setPreferences", nil)
-	return (resp.Status == "200 OK"), err
+	return resp.Status == "200 OK", err
 }
 
 //DefaultSavePath of the qbittorrent client
@@ -326,7 +326,7 @@ func (client *Client) Shutdown() (shuttingDown bool, err error) {
 	resp, err := client.get("api/v2/app/shutdown", nil)
 
 	// return true if successful
-	return (resp.Status == "200 OK"), err
+	return resp.Status == "200 OK", err
 }
 
 // Log Endpoints
@@ -383,7 +383,7 @@ func (client *Client) ToggleAltSpeedLimits() (toggled bool, err error) {
 	if err != nil {
 		return toggled, err
 	}
-	return (resp.Status == "200 OK"), err
+	return resp.Status == "200 OK", err
 }
 
 //DlLimit returns info you usually see in qBt status bar.
@@ -403,7 +403,7 @@ func (client *Client) SetDlLimit(limit int) (set bool, err error) {
 	if err != nil {
 		return set, err
 	}
-	return (resp.Status == "200 OK"), err
+	return resp.Status == "200 OK", err
 }
 
 //UlLimit returns info you usually see in qBt status bar.
@@ -423,7 +423,7 @@ func (client *Client) SetUlLimit(limit int) (set bool, err error) {
 	if err != nil {
 		return set, err
 	}
-	return (resp.Status == "200 OK"), err
+	return resp.Status == "200 OK", err
 }
 
 //Torrents returns a list of all torrents in qbittorrent matching your filter
@@ -752,7 +752,7 @@ func (client *Client) RemoveTrackers(hash string, trackers []string) error {
 	case 409:
 		return wrapper.Errorf("All URLs were not found")
 	default:
-		return wrapper.Errorf("An unknown error occurred causing a status code of: %", sc)
+		return wrapper.Errorf("An unknown error occurred causing a status code of: %d", sc)
 	}
 }
 
@@ -770,7 +770,7 @@ func (client *Client) IncreasePriority(hashes []string) error {
 	case 409:
 		return wrapper.Errorf("Torrent queueing is not enabled")
 	default:
-		return wrapper.Errorf("An unknown error occurred causing a status code of: %", sc)
+		return wrapper.Errorf("An unknown error occurred causing a status code of: %d", sc)
 	}
 }
 
@@ -788,7 +788,7 @@ func (client *Client) DecreasePriority(hashes []string) error {
 	case 409:
 		return wrapper.Errorf("Torrent queueing is not enabled")
 	default:
-		return wrapper.Errorf("An unknown error occurred causing a status code of: %", sc)
+		return wrapper.Errorf("An unknown error occurred causing a status code of: %d", sc)
 	}
 }
 
@@ -806,7 +806,7 @@ func (client *Client) MaxPriority(hashes []string) error {
 	case 409:
 		return wrapper.Errorf("Torrent queueing is not enabled")
 	default:
-		return wrapper.Errorf("An unknown error occurred causing a status code of: %", sc)
+		return wrapper.Errorf("An unknown error occurred causing a status code of: %d", sc)
 	}
 }
 
@@ -824,7 +824,7 @@ func (client *Client) MinPriority(hashes []string) error {
 	case 409:
 		return wrapper.Errorf("Torrent queueing is not enabled")
 	default:
-		return wrapper.Errorf("An unknown error occurred causing a status code of: %", sc)
+		return wrapper.Errorf("An unknown error occurred causing a status code of: %d", sc)
 	}
 }
 
@@ -853,7 +853,7 @@ func (client *Client) FilePriority(hash string, ids []int, priority int) error {
 	case 409:
 		return wrapper.Errorf("Torrent metadata hasn't downloaded yet or at least one file id was not found")
 	default:
-		return wrapper.Errorf("An unknown error occurred causing a status code of: %", sc)
+		return wrapper.Errorf("An unknown error occurred causing a status code of: %d", sc)
 	}
 }
 

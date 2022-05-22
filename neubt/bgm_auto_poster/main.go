@@ -8,10 +8,13 @@ import (
 	"crawler/neubt"
 	neubt_crawler "crawler/neubt/crawler"
 	"crawler/ptgen"
+	"crawler/qbt"
+	"crawler/util"
 	"encoding/json"
-	"errors"
+	"github.com/pkg/errors"
 	"log"
 	"os"
+	"regexp"
 	"time"
 )
 
@@ -99,6 +102,12 @@ func main() {
 				return
 			}
 			poster.SetPTGENContent(text)
+			mediaInfo, err := GetMediaInfoFromWEBUI(ti.InfoHash, p.Webui)
+			if err != nil {
+				log.Println("failed to get media info: ", err)
+				return
+			}
+			poster.SetMediaInfoContent(mediaInfo)
 			data, err := crawler.LoadTorrentFromFile(p.Config.TorrentPath, ti.InfoHash)
 			if err != nil {
 				log.Println("failed to load torrent from disk: ", err)
@@ -206,4 +215,38 @@ func UpdateWithTorrentInfo(poster neubt_crawler.TorrentPoster, info *dao.Bangumi
 		"[/code]",
 	)
 	return nil
+}
+
+func GetMediaInfoFromWEBUI(infoHash string, webui qbt.WEBUIHelper) (string, error) {
+	// generate media info
+	log.Println("generating media info")
+	torrent, files, err := webui.GetTorrentDetail(infoHash)
+	if err != nil {
+		return "", errors.Wrap(err, "failed to get torrent files")
+	}
+	savePath := torrent.SavePath
+	var fileName string
+	for _, file := range files {
+		if IsVideoFile(file.Name) {
+			fileName = file.Name
+			break
+		}
+		log.Println(file.Name, "is not a video file")
+	}
+	if len(fileName) == 0 {
+		return "", errors.New("can not find valid video file in torrent")
+	}
+	info, err := util.GetMediaInfo("./lib", savePath, fileName)
+	if err != nil {
+		return "", errors.Wrap(err, "failed to generate media info of file"+fileName)
+	}
+	return info, nil
+}
+
+func IsVideoFile(name string) bool {
+	result := regexp.MustCompile(`(.mp4|.ts|.mkv)`).FindAllString(name, -1)
+	if result == nil {
+		return false
+	}
+	return true
 }

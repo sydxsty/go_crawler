@@ -11,6 +11,7 @@ type WEBUIHelper interface {
 	AddTorrentFromData(data []byte) error
 	Contains(infoHash string) bool
 	Completed(infoHash string) bool
+	GetTorrentDetail(infoHash string) (*Torrent, []TorrentFile, error)
 }
 
 type WEBUIHelperImpl struct {
@@ -69,4 +70,16 @@ func (w *WEBUIHelperImpl) Completed(infoHash string) bool {
 		return true
 	}
 	return false
+}
+
+func (w *WEBUIHelperImpl) GetTorrentDetail(infoHash string) (*Torrent, []TorrentFile, error) {
+	torrent, err := w.client.Torrent(infoHash)
+	if err != nil {
+		return nil, nil, err
+	}
+	files, err := w.client.TorrentFiles(infoHash)
+	if err != nil {
+		return nil, nil, err
+	}
+	return &torrent, files, nil
 }
