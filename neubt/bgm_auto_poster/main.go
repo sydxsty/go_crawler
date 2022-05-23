@@ -6,7 +6,7 @@ import (
 	"crawler/bangumi/crawler"
 	"crawler/bangumi/dao"
 	"crawler/neubt"
-	neubt_crawler "crawler/neubt/crawler"
+	neubtCrawler "crawler/neubt/crawler"
 	"crawler/ptgen"
 	"crawler/qbt"
 	"crawler/util"
@@ -86,7 +86,7 @@ func main() {
 				return
 			}
 			// for completed torrents
-			poster, err := neubt_crawler.NewTorrentPoster("44", p.Client)
+			poster, err := neubtCrawler.NewTorrentPoster("44", p.Client)
 			if err != nil {
 				log.Println("failed to create neubt poster: ", err)
 				return
@@ -152,12 +152,12 @@ func (p *Poster) GetTorrentPTGenDetail(info *dao.BangumiTorrentInfo) (map[string
 }
 
 func (p *Poster) downloadTorrentByLink(link string) error {
-	detail := neubt_crawler.NewForumDetail(p.Client)
+	detail := neubtCrawler.NewForumDetail(p.Client)
 	torrentURLs, err := detail.GetFloorDetailFromForum(link)
 	if err != nil {
 		log.Println(err, "wrong torrent info")
 	}
-	downloader := neubt_crawler.NewDownloader(p.Client)
+	downloader := neubtCrawler.NewDownloader(p.Client)
 	for _, torrentURL := range torrentURLs {
 		data, err := downloader.DownloadFromNestedURL(torrentURL.Comment.TorrentLink)
 		if err != nil {
@@ -180,7 +180,7 @@ func (p *Poster) downloadTorrentByLink(link string) error {
 	return errors.New("no torrent found in neu bt")
 }
 
-func UpdateWithTorrentInfo(poster neubt_crawler.TorrentPoster, info *dao.BangumiTorrentInfo) error {
+func UpdateWithTorrentInfo(poster neubtCrawler.TorrentPoster, info *dao.BangumiTorrentInfo) error {
 	poster.SetTidByName("连载动画")
 	poster.SetPostFileName(info.Title)
 	if info.Detail.TorrentChsName == "" && info.Detail.TorrentEngName == "" {

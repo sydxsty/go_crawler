@@ -145,21 +145,20 @@ func (t *TorrentPosterImpl) PostTorrentMultiPart(data []byte) (string, error) {
 	body := new(bytes.Buffer)
 	w := multipart.NewWriter(body)
 
-	w.WriteField(UTF82GB2312("formhash"), UTF82GB2312(t.formHash))
-	w.WriteField(UTF82GB2312("posttime"), UTF82GB2312(t.postTime))
-	w.WriteField(UTF82GB2312("wysiwyg"), UTF82GB2312(t.wysiwyg))
-	w.WriteField(UTF82GB2312("special"), UTF82GB2312(t.special))
-	w.WriteField(UTF82GB2312("specialextra"), UTF82GB2312(t.specialExtra))
-	w.WriteField(UTF82GB2312("typeid"), UTF82GB2312(t.tid))
-	w.WriteField(UTF82GB2312("subject"), UTF82GB2312(t.subject))
-	w.WriteField(UTF82GB2312("message"), UTF82GB2312(t.getMessageBody()))
-	w.WriteField(UTF82GB2312("readperm"), UTF82GB2312(""))
-	w.WriteField(UTF82GB2312("tags"), UTF82GB2312(""))
-	w.WriteField(UTF82GB2312("allownoticeauthor"), UTF82GB2312("1"))
-	w.WriteField(UTF82GB2312("usesig"), UTF82GB2312("1"))
-	w.WriteField(UTF82GB2312("save"), UTF82GB2312(""))
+	_ = w.WriteField(UTF82GB2312("formhash"), UTF82GB2312(t.formHash))
+	_ = w.WriteField(UTF82GB2312("posttime"), UTF82GB2312(t.postTime))
+	_ = w.WriteField(UTF82GB2312("wysiwyg"), UTF82GB2312(t.wysiwyg))
+	_ = w.WriteField(UTF82GB2312("special"), UTF82GB2312(t.special))
+	_ = w.WriteField(UTF82GB2312("specialextra"), UTF82GB2312(t.specialExtra))
+	_ = w.WriteField(UTF82GB2312("typeid"), UTF82GB2312(t.tid))
+	_ = w.WriteField(UTF82GB2312("subject"), UTF82GB2312(t.subject))
+	_ = w.WriteField(UTF82GB2312("message"), UTF82GB2312(t.getMessageBody()))
+	_ = w.WriteField(UTF82GB2312("readperm"), UTF82GB2312(""))
+	_ = w.WriteField(UTF82GB2312("tags"), UTF82GB2312(""))
+	_ = w.WriteField(UTF82GB2312("allownoticeauthor"), UTF82GB2312("1"))
+	_ = w.WriteField(UTF82GB2312("usesig"), UTF82GB2312("1"))
+	_ = w.WriteField(UTF82GB2312("save"), UTF82GB2312(""))
 
-	// data, _ := ioutil.ReadFile(path + file)
 	pa, _ := w.CreateFormFile(UTF82GB2312("torrent"), UTF82GB2312(t.postFileName+".torrent"))
 	if _, err := pa.Write(data); err != nil {
 		return "", err
@@ -183,9 +182,14 @@ func (t *TorrentPosterImpl) PostTorrentMultiPart(data []byte) (string, error) {
 }
 
 func UTF82GB2312(s string) string {
-	covert, err := gcharset.UTF8To("GBK", s)
-	if err != nil {
-		log.Fatalln(err)
+	var covert string
+	for _, v := range s {
+		res, err := gcharset.UTF8To("GBK", string(v))
+		if err != nil {
+			log.Println(`error when transform word`, string(v))
+			continue
+		}
+		covert += res
 	}
 	return covert
 }
