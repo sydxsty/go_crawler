@@ -38,4 +38,8 @@ https://github.com/sydxsty/go_crawler/blob/master/neubt/bgm_auto_poster/main.go
 
 ## 使用方法
 目录结构同NEUBT爬虫，运行即可
-### 强烈不建议直接用，目前过滤结构仍不完善，会发布大量重复种子
+每隔600秒扫描种子
+### 虽然目前过滤结构仍不完善，但是已经添加了简单过滤器，试运行中
+自定义过滤器文件
+https://github.com/sydxsty/go_crawler/blob/master/bangumi/dao/torrent_manager.go
+TODO：提取规则到文件
