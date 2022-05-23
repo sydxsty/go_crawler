@@ -70,7 +70,7 @@ func (t *TorrentManager) CanDownloadFromBangumi(info *BangumiTorrentInfo) error 
 		return errors.New("720p, skip download, " + v[0])
 	}
 	// TODO: have bugs, consider using machine learning
-	if v := regexp.MustCompile(`((繁體)|(繁日)|(CHT)|(BIG5))`).FindAllString(info.Title, -1); len(v) != 0 {
+	if v := regexp.MustCompile(`((繁體)|(繁日)|(CHT)|(BIG5)|(繁体))`).FindAllString(info.Title, -1); len(v) != 0 {
 		return errors.New("is not sc, skip download, " + v[0])
 	}
 

@@ -39,7 +39,7 @@ func (p *PTGenImpl) GetBangumiLinkByName(name string) (map[string]string, error)
 	if name == "" {
 		return nil, errors.New("query name is empty")
 	}
-	resp, err := p.client.SyncVisit(`/?` + url.QueryEscape(`search=`+name+`&source=bangumi`))
+	resp, err := p.client.SyncVisit(`/?` + `search=` + url.QueryEscape(name) + `&source=bangumi`)
 	if err != nil {
 		return nil, err
 	}
