@@ -83,18 +83,19 @@ func (t *TorrentManager) CanDownloadFromBangumi(info *BangumiTorrentInfo) error 
 	}
 
 	detail := make(map[string]interface{})
-	v, err := t.getState(name, "team")
+	// get the uploaded team of current episode
+	v, err := t.getState(name, info.Detail.Episode)
 	if err == nil {
 		if tmp, ok := v.(map[string]interface{}); ok && tmp != nil {
 			detail = tmp
 		}
 	}
 
-	if _, ok := detail[info.Detail.Episode+info.Detail.TeamName]; ok {
+	if _, ok := detail[info.Detail.TeamName]; ok {
 		return errors.New("we have already downloaded the same torrent")
 	}
-	detail[info.Detail.Episode+info.Detail.TeamName] = true
-	err = t.setState(name, "team", detail)
+	detail[info.Detail.TeamName] = true
+	err = t.setState(name, info.Detail.Episode, detail)
 	if err != nil {
 		return err
 	}
