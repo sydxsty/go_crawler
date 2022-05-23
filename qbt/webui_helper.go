@@ -12,6 +12,7 @@ type WEBUIHelper interface {
 	Contains(infoHash string) bool
 	Completed(infoHash string) bool
 	GetTorrentDetail(infoHash string) (*Torrent, []TorrentFile, error)
+	Pause(infoHash string) error
 }
 
 type WEBUIHelperImpl struct {
@@ -70,6 +71,10 @@ func (w *WEBUIHelperImpl) Completed(infoHash string) bool {
 		return true
 	}
 	return false
+}
+
+func (w *WEBUIHelperImpl) Pause(infoHash string) error {
+	return w.client.Pause([]string{infoHash})
 }
 
 func (w *WEBUIHelperImpl) GetTorrentDetail(infoHash string) (*Torrent, []TorrentFile, error) {

@@ -93,6 +93,12 @@ func main() {
 			}
 			// for completed torrents
 			log.Println("prepare to post torrent to neubt: ", ti.Title)
+			// pause torrent to reduce network overhead
+			err = p.Webui.Pause(ti.InfoHash)
+			if err != nil {
+				log.Println("can not pause torrent, webui may have fault: ", err)
+				return
+			}
 			poster, err := neubtCrawler.NewTorrentPoster("44", p.Client)
 			if err != nil {
 				log.Println("failed to create neubt poster: ", err)
