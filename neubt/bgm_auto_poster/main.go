@@ -47,7 +47,7 @@ func NewPoster() *Poster {
 		bgmDownloader: crawler.NewDownloader(bgmClient),
 		bgmTrMgr:      dao.NewTorrentManager(nb.KVS),
 		ptgenClient:   ptgenClient,
-		ptgen:         ptgen.NewPTGen(ptgenClient),
+		ptgen:         ptgen.NewBufferedPTGen(ptgenClient, nb.KVS),
 	}
 }
 
@@ -55,9 +55,10 @@ func main() {
 	p := NewPoster()
 	for {
 		err := crawler.ScanBangumiTorrent(p.bgm, func(ti *dao.BangumiTorrentInfo) {
+			log.Println("--------Analysing torrent: ", ti.Title, "--------")
 			if p.bgmTrMgr.TorrentIsPosted(ti.InfoHash) {
 				// if posted, continue
-				log.Println("torrent is posted: ", ti.Title)
+				log.Println("torrent is already posted, skip")
 				return
 			}
 			if p.Webui.Contains(ti.InfoHash) && !p.Webui.Completed(ti.InfoHash) {
@@ -68,11 +69,16 @@ func main() {
 			// 2. torrent completed
 			detail, err := p.GetTorrentPTGenDetail(ti)
 			if err != nil {
-				log.Println("no matching result in ptgen: ", ti.Title, err)
+				log.Println("no matching result in ptgen: ", err)
 				return
 			}
 			// for torrents not exist
 			if !p.Webui.Completed(ti.InfoHash) {
+				log.Println("prepare to download torrent from bangumi: ", ti.Title)
+				if err := p.bgmTrMgr.CanDownloadFromBangumi(ti); err != nil {
+					log.Println("filter failure reason", err)
+					return
+				}
 				_, err = crawler.DownloadBangumiTorrentToFile(
 					ti.Detail.TorrentDownloadURL,
 					p.Config.TorrentPath,
@@ -86,6 +92,7 @@ func main() {
 				return
 			}
 			// for completed torrents
+			log.Println("prepare to post torrent to neubt: ", ti.Title)
 			poster, err := neubtCrawler.NewTorrentPoster("44", p.Client)
 			if err != nil {
 				log.Println("failed to create neubt poster: ", err)
@@ -113,14 +120,17 @@ func main() {
 				log.Println("failed to load torrent from disk: ", err)
 				return
 			}
+			// wait for 5 second
+			time.Sleep(time.Second * 5)
+			// mark the torrent posted
+			p.bgmTrMgr.SetTorrentPostedState(ti.InfoHash)
 			url, err := poster.PostTorrentMultiPart(data)
 			if err != nil {
 				log.Println("failed to post torrent to neu bt: ", err)
 				return
 			}
-			// mark the torrent posted
-			p.bgmTrMgr.SetTorrentPostedState(ti.InfoHash)
-
+			// wait for 5 second
+			time.Sleep(time.Second * 5)
 			err = p.downloadTorrentByLink(url)
 			if err != nil {
 				log.Println("failed to download post torrent to neu bt: ", err)
@@ -183,7 +193,7 @@ func (p *Poster) downloadTorrentByLink(link string) error {
 func UpdateWithTorrentInfo(poster neubtCrawler.TorrentPoster, info *dao.BangumiTorrentInfo) error {
 	poster.SetTidByName("连载动画")
 	poster.SetPostFileName(info.Title)
-	if info.Detail.TorrentChsName == "" && info.Detail.TorrentEngName == "" {
+	if _, err := info.GetCHNName(); err != nil {
 		return errors.New("no Chinese name or English name found in info")
 	}
 	if info.Detail.TeamName == "" {

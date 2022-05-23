@@ -124,3 +124,16 @@ func (b *BangumiTorrentInfo) InitTorrentDetail(miscList []map[string]interface{}
 	}
 	d.Episode = getSeason() + getEpisode() + getOVA()
 }
+
+func (b *BangumiTorrentInfo) GetCHNName() (string, error) {
+	if b.Detail == nil {
+		return "", errors.New("torrent detail is not init")
+	}
+	if len(b.Detail.TorrentChsName) != 0 {
+		return b.Detail.TorrentChsName, nil
+	}
+	if len(b.Detail.TorrentEngName) != 0 {
+		return b.Detail.TorrentEngName, nil
+	}
+	return "", errors.New("no valid torrent chs name found")
+}
