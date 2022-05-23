@@ -19,7 +19,7 @@ func GetMediaInfo(execFileDir, mediaPath, mediaName string) (string, error) {
 
 	var result string
 	callback := func(str string) error {
-		result += strings.ReplaceAll(str, mediaPath, "")
+		result += strings.ReplaceAll(str, mediaPath, "{Hidden absolute path}")
 		return nil
 	}
 	err := ExecCmd(`./`, filepath.Join(execFileDir, `mediainfo`), []string{filepath.Join(mediaPath, mediaName)}, callback)
