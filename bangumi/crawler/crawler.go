@@ -95,7 +95,7 @@ func (b *BangumiImpl) GetTeamByTag(ids ...string) []map[string]interface{} {
 	return b.getBufferedPropertyByTag(ids, `api/team/fetch`)
 }
 
-func (b *BangumiImpl) getBufferedPropertyByTag(ids []string, url string) []map[string]interface{} {
+func (b *BangumiImpl) getBufferedPropertyByTag(ids []string, link string) []map[string]interface{} {
 	var resultList []map[string]interface{}
 	var animeIDList []string
 	for _, id := range ids {
@@ -109,7 +109,7 @@ func (b *BangumiImpl) getBufferedPropertyByTag(ids []string, url string) []map[s
 	}
 	// load the rest and save to db
 	if len(animeIDList) != 0 {
-		tags, err := b.getPropertyByTag(animeIDList, url)
+		tags, err := b.getPropertyByTag(animeIDList, link)
 		if err != nil {
 			log.Println("error occurred when get from web, ", err)
 		}
@@ -123,14 +123,14 @@ func (b *BangumiImpl) getBufferedPropertyByTag(ids []string, url string) []map[s
 	return resultList
 }
 
-func (b *BangumiImpl) getPropertyByTag(id []string, url string) ([]map[string]interface{}, error) {
+func (b *BangumiImpl) getPropertyByTag(id []string, link string) ([]map[string]interface{}, error) {
 	postData := make(map[string]interface{})
 	postData["_ids"] = id
 	raw, err := json.Marshal(postData)
 	if err != nil {
 		return nil, err
 	}
-	resp, err := b.client.SyncPostRaw(url, raw)
+	resp, err := b.client.SyncPostRaw(link, raw)
 	if err != nil {
 		return nil, err
 	}

@@ -14,10 +14,10 @@ type Client interface {
 	SetResponseCallback(callback func(r *colly.Response))
 
 	// SyncVisit url after setting corresponding request and response
-	SyncVisit(url string) (*colly.Response, error)
+	SyncVisit(link string) (*colly.Response, error)
 
 	// SyncPostRaw post raw data, can be used in posting multipart
-	SyncPostRaw(url string, body []byte) (*colly.Response, error)
+	SyncPostRaw(link string, body []byte) (*colly.Response, error)
 
 	// Clone a new Client
 	Clone() Client
@@ -52,29 +52,29 @@ func (b *BangumiClient) SetResponseCallback(callback func(r *colly.Response)) {
 	b.collector.OnResponse(callback)
 }
 
-func (b *BangumiClient) visit(url string) error {
+func (b *BangumiClient) visit(link string) error {
 	defer b.Reset()
-	return b.collector.Visit(util.MustGetAbsoluteURL(b.domain, url))
+	return b.collector.Visit(util.MustGetAbsoluteURL(b.domain, link))
 }
 
-func (b *BangumiClient) SyncVisit(url string) (*colly.Response, error) {
+func (b *BangumiClient) SyncVisit(link string) (*colly.Response, error) {
 	var resp *colly.Response
 	b.SetResponseCallback(func(r *colly.Response) {
 		resp = r
 	})
-	if err := b.visit(url); err != nil {
+	if err := b.visit(link); err != nil {
 		return nil, err
 	}
 	return resp, nil
 }
 
-func (b *BangumiClient) SyncPostRaw(url string, body []byte) (*colly.Response, error) {
+func (b *BangumiClient) SyncPostRaw(link string, body []byte) (*colly.Response, error) {
 	var resp *colly.Response
 	b.SetResponseCallback(func(r *colly.Response) {
 		resp = r
 	})
 	defer b.Reset()
-	if err := b.collector.PostRaw(util.MustGetAbsoluteURL(b.domain, url), body); err != nil {
+	if err := b.collector.PostRaw(util.MustGetAbsoluteURL(b.domain, link), body); err != nil {
 		return nil, err
 	}
 	return resp, nil

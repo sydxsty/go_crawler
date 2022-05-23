@@ -6,7 +6,7 @@ import (
 )
 
 type Downloader interface {
-	DownloadTorrentFromUrl(url string) ([]byte, error)
+	DownloadTorrentFromUrl(link string) ([]byte, error)
 }
 
 type DownloaderImpl struct {
@@ -19,9 +19,9 @@ func NewDownloader(client bangumi.Client) Downloader {
 	}
 }
 
-func (d *DownloaderImpl) DownloadTorrentFromUrl(url string) ([]byte, error) {
-	log.Println("download torrent from ", url)
-	resp, err := d.client.SyncVisit(url)
+func (d *DownloaderImpl) DownloadTorrentFromUrl(link string) ([]byte, error) {
+	log.Println("download torrent from ", link)
+	resp, err := d.client.SyncVisit(link)
 	if err != nil {
 		return nil, err
 	}

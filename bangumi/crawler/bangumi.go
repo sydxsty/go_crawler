@@ -25,8 +25,8 @@ func ScanBangumiTorrent(bgm Bangumi, postTorrentFunc func(*dao.BangumiTorrentInf
 	return nil
 }
 
-func DownloadBangumiTorrent(url string, d Downloader, q qbt.WEBUIHelper) ([]byte, error) {
-	data, err := d.DownloadTorrentFromUrl(url)
+func DownloadBangumiTorrent(link string, d Downloader, q qbt.WEBUIHelper) ([]byte, error) {
+	data, err := d.DownloadTorrentFromUrl(link)
 	if err != nil {
 		return nil, err
 	}
@@ -37,8 +37,8 @@ func DownloadBangumiTorrent(url string, d Downloader, q qbt.WEBUIHelper) ([]byte
 	return data, nil
 }
 
-func DownloadBangumiTorrentToFile(url string, path string, hash string, d Downloader, q qbt.WEBUIHelper) ([]byte, error) {
-	data, err := d.DownloadTorrentFromUrl(url)
+func DownloadBangumiTorrentToFile(link string, path string, hash string, d Downloader, q qbt.WEBUIHelper) ([]byte, error) {
+	data, err := d.DownloadTorrentFromUrl(link)
 	if err != nil {
 		return nil, err
 	}

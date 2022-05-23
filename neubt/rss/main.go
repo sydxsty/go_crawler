@@ -32,9 +32,9 @@ func NewRSS() *RSS {
 	}
 }
 
-func (r *RSS) crawlForum(url string) {
+func (r *RSS) crawlForum(link string) {
 	forum := crawler.NewForum(r.Client)
-	list, err := forum.GetForum(url)
+	list, err := forum.GetForum(link)
 	if err != nil {
 		log.Fatal(err, "can not get forum")
 	}

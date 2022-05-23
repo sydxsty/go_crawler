@@ -14,10 +14,10 @@ type Client interface {
 	SetResponseCallback(callback func(r *colly.Response))
 
 	// SyncVisit url after setting corresponding request and response
-	SyncVisit(url string) (*colly.Response, error)
+	SyncVisit(link string) (*colly.Response, error)
 
 	// SyncPostRaw post raw data, can be used in posting multipart
-	SyncPostRaw(url string, body []byte) (*colly.Response, error)
+	SyncPostRaw(link string, body []byte) (*colly.Response, error)
 
 	// Clone a new Client
 	Clone() Client
@@ -52,29 +52,29 @@ func (p *PTGenClient) SetResponseCallback(callback func(r *colly.Response)) {
 	p.collector.OnResponse(callback)
 }
 
-func (p *PTGenClient) visit(url string) error {
+func (p *PTGenClient) visit(link string) error {
 	defer p.Reset()
-	return p.collector.Visit(util.MustGetAbsoluteURL(p.domain, url))
+	return p.collector.Visit(util.MustGetAbsoluteURL(p.domain, link))
 }
 
-func (p *PTGenClient) SyncVisit(url string) (*colly.Response, error) {
+func (p *PTGenClient) SyncVisit(link string) (*colly.Response, error) {
 	var resp *colly.Response
 	p.SetResponseCallback(func(r *colly.Response) {
 		resp = r
 	})
-	if err := p.visit(url); err != nil {
+	if err := p.visit(link); err != nil {
 		return nil, err
 	}
 	return resp, nil
 }
 
-func (p *PTGenClient) SyncPostRaw(url string, body []byte) (*colly.Response, error) {
+func (p *PTGenClient) SyncPostRaw(link string, body []byte) (*colly.Response, error) {
 	var resp *colly.Response
 	p.SetResponseCallback(func(r *colly.Response) {
 		resp = r
 	})
 	defer p.Reset()
-	if err := p.collector.PostRaw(util.MustGetAbsoluteURL(p.domain, url), body); err != nil {
+	if err := p.collector.PostRaw(util.MustGetAbsoluteURL(p.domain, link), body); err != nil {
 		return nil, err
 	}
 	return resp, nil

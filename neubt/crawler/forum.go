@@ -9,7 +9,7 @@ type Forum interface {
 	// GetForumList return all sections from / url
 	GetForumList() (map[string]string, error)
 	// GetForum return a list of torrent forums from specific sections
-	GetForum(url string) ([]*html.NodeDecorator, error)
+	GetForum(link string) ([]*html.NodeDecorator, error)
 }
 
 type ForumImpl struct {
@@ -45,8 +45,8 @@ func (f *ForumImpl) GetForumList() (map[string]string, error) {
 	return forumList, nil
 }
 
-func (f *ForumImpl) GetForum(url string) ([]*html.NodeDecorator, error) {
-	resp, err := f.client.SyncVisit(url)
+func (f *ForumImpl) GetForum(link string) ([]*html.NodeDecorator, error) {
+	resp, err := f.client.SyncVisit(link)
 	if err != nil {
 		return nil, err
 	}
