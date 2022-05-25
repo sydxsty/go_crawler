@@ -33,6 +33,15 @@ func TestLoginWithCookie(t *testing.T) {
 	assert.False(t, strings.Index(string(resp.Body), `登录`) != -1, "cookie login unsuccessful")
 }
 
+func TestClone(t *testing.T) {
+	err := client.LoadCookie(cfg.CookiePath)
+	assert.NoError(t, err, "load cookie failure")
+	client2 := client.Clone()
+	resp, err := client2.SyncVisit(`plugin.php?id=neubt_resourceindex`)
+	assert.NoError(t, err, "visit index page failure")
+	assert.False(t, strings.Index(string(resp.Body), `登录`) != -1, "cookie login unsuccessful")
+}
+
 func init() {
 	var err error
 	cfg, err = storage.LoadConfig("./data/config.yaml")
