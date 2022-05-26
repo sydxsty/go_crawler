@@ -5,6 +5,7 @@ import (
 	"crawler/neubt/html"
 )
 
+// ResourceIndex process pages like http://bt.neu6.edu.cn/plugin.php?id=neubt_resourceindex
 type ResourceIndex interface {
 	// GetResourceIndex return all node from / url
 	GetResourceIndex() ([]*html.NodeDecorator, error)

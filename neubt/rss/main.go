@@ -66,8 +66,8 @@ func (r *RSS) downloadTorrentByInfo(info *dao.TorrentInfo) {
 		log.Println("torrent condition not met")
 		return
 	}
-	detail := crawler.NewForumDetail(r.Client)
-	torrentURLs, err := detail.GetFloorDetailFromForum(info.Link)
+	detail := crawler.NewThreadDetail(r.Client)
+	torrentURLs, err := detail.GetFloorDetailFromThread(info.Link)
 	if err != nil {
 		log.Println(err, "wrong torrent info")
 	}

@@ -6,6 +6,7 @@ import (
 	"errors"
 )
 
+// Downloader download torrent from url like http://bt.neu6.edu.cn/forum.php?mod=attachment&aid=XXX
 type Downloader interface {
 	// DownloadFromNestedURL return the name and the bytecode of selected torrent
 	DownloadFromNestedURL(link string) ([]byte, error)

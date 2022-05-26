@@ -12,10 +12,11 @@ import (
 	"strings"
 )
 
+// TorrentPoster post torrent
 type TorrentPoster interface {
 	// PostTorrentMultiPart if success, return the url of the new torrent
 	PostTorrentMultiPart(data []byte) (string, error)
-	// SetTitle forum title
+	// SetTitle thread title
 	SetTitle(pieces ...string)
 	// SetTid torrent kind
 	SetTid(tid string) bool
@@ -45,7 +46,7 @@ type TorrentPosterImpl struct {
 	genTxt        string // main message, from pt-gen
 	mediaInfoText string // media info
 	comment       string // header message, torrent detail
-	postFileName  string // the torrent name showed in forum
+	postFileName  string // the torrent name showed in thread
 }
 
 func (t *TorrentPosterImpl) SetTid(tid string) bool {

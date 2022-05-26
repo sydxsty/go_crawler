@@ -7,20 +7,21 @@ import (
 	"strconv"
 )
 
-type ForumDetail interface {
-	// GetFloorDetailFromForum return all the floors in a forum
-	GetFloorDetailFromForum(link string) ([]*FloorDetail, error)
-	// GetTorrentURLFromForum get all floors that contain a torrent-like link
-	GetTorrentURLFromForum(link string) ([]*FloorDetail, error)
+// ThreadDetail process pages like http://bt.neu6.edu.cn/thread-XXX-1-1.html
+type ThreadDetail interface {
+	// GetFloorDetailFromThread return all the floors in a thread
+	GetFloorDetailFromThread(link string) ([]*FloorDetail, error)
+	// GetTorrentURLFromThread get all floors that contain a torrent-like link
+	GetTorrentURLFromThread(link string) ([]*FloorDetail, error)
 }
 
-type ForumDetailImpl struct {
+type ThreadDetailImpl struct {
 	client   neubt.Client
 	MaxDepth int
 }
 
-func NewForumDetail(client neubt.Client) ForumDetail {
-	f := &ForumDetailImpl{
+func NewThreadDetail(client neubt.Client) ThreadDetail {
+	f := &ThreadDetailImpl{
 		client:   client.Clone(),
 		MaxDepth: 10,
 	}
@@ -44,7 +45,7 @@ type FloorDetail struct {
 	UserInfo *UserInfo
 }
 
-func (f *ForumDetailImpl) GetFloorDetailFromForum(link string) ([]*FloorDetail, error) {
+func (f *ThreadDetailImpl) GetFloorDetailFromThread(link string) ([]*FloorDetail, error) {
 	var floors []*FloorDetail
 	nextPage := link
 	for i := 0; i < f.MaxDepth && nextPage != ""; i++ {
@@ -79,7 +80,7 @@ func (f *ForumDetailImpl) GetFloorDetailFromForum(link string) ([]*FloorDetail, 
 	return floors, nil
 }
 
-func (f *ForumDetailImpl) getUserDetailByDiv(n *html.NodeDecorator) (*UserInfo, error) {
+func (f *ThreadDetailImpl) getUserDetailByDiv(n *html.NodeDecorator) (*UserInfo, error) {
 	node, err := n.GetInnerNode(`.//div[@class="pls favatar"]`)
 	if err != nil {
 		return nil, err
@@ -92,7 +93,7 @@ func (f *ForumDetailImpl) getUserDetailByDiv(n *html.NodeDecorator) (*UserInfo, 
 	return userInfo, nil
 }
 
-func (f *ForumDetailImpl) getCommentDetailByDiv(n *html.NodeDecorator) (*CommentInfo, error) {
+func (f *ThreadDetailImpl) getCommentDetailByDiv(n *html.NodeDecorator) (*CommentInfo, error) {
 	commentInfo := &CommentInfo{}
 	commentInfo.Text, _ = n.GetInnerString(`.//td[starts-with(@id, 'postmessage_')]`)
 	// get torrent file
@@ -101,9 +102,8 @@ func (f *ForumDetailImpl) getCommentDetailByDiv(n *html.NodeDecorator) (*Comment
 	return commentInfo, nil
 }
 
-// GetTorrentURLFromForum get all floor that contains a torrent-like link
-func (f *ForumDetailImpl) GetTorrentURLFromForum(link string) ([]*FloorDetail, error) {
-	floors, err := f.GetFloorDetailFromForum(link)
+func (f *ThreadDetailImpl) GetTorrentURLFromThread(link string) ([]*FloorDetail, error) {
+	floors, err := f.GetFloorDetailFromThread(link)
 	if err != nil {
 		return nil, err
 	}

@@ -168,8 +168,8 @@ func (p *Poster) GetTorrentPTGenDetail(info *dao.BangumiTorrentInfo) (map[string
 }
 
 func (p *Poster) downloadTorrentByLink(link string) error {
-	detail := neubtCrawler.NewForumDetail(p.Client)
-	torrentURLs, err := detail.GetFloorDetailFromForum(link)
+	detail := neubtCrawler.NewThreadDetail(p.Client)
+	torrentURLs, err := detail.GetFloorDetailFromThread(link)
 	if err != nil {
 		log.Println(err, "wrong torrent info")
 	}
