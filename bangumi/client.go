@@ -12,13 +12,13 @@ type Client interface {
 }
 
 type ClientImpl struct {
-	util.Client // parent
+	util.ClientBase // parent
 }
 
 func NewClient() (Client, error) {
 	client := &ClientImpl{}
 	var err error
-	client.Client, _ = util.NewClientBase("https://bangumi.moe")
+	client.ClientBase, err = util.NewClientBase("https://bangumi.moe")
 	if err != nil {
 		return nil, err
 	}
@@ -29,7 +29,7 @@ func NewClient() (Client, error) {
 
 func (c *ClientImpl) Clone() Client {
 	client := &ClientImpl{
-		Client: c.Client.CloneBase(),
+		ClientBase: c.ClientBase.CloneBase(),
 	}
 	client.SetChild(client)
 	client.Reset()
@@ -37,7 +37,7 @@ func (c *ClientImpl) Clone() Client {
 }
 
 func (c *ClientImpl) Reset() {
-	c.Client.Reset()
+	c.ClientBase.Reset()
 	c.SetRequestCallback(func(r *colly.Request) {
 		r.Headers.Set("Host", "bangumi.moe")
 		r.Headers.Set("Connection", "keep-alive")

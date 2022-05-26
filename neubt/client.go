@@ -19,9 +19,9 @@ type Client interface {
 }
 
 type ClientImpl struct {
-	util.Client // parent
-	db          storage.KVStorage
-	domain      *url.URL
+	util.ClientBase // parent
+	db              storage.KVStorage
+	domain          *url.URL
 }
 
 func NewClient(db storage.KVStorage) (Client, error) {
@@ -29,7 +29,10 @@ func NewClient(db storage.KVStorage) (Client, error) {
 	var err error
 	link := "http://[2001:da8:9000::232]"
 	client.domain, err = url.Parse(link)
-	client.Client, err = util.NewClientBase(link)
+	if err != nil {
+		return nil, err
+	}
+	client.ClientBase, err = util.NewClientBase(link)
 	if err != nil {
 		return nil, err
 	}
@@ -71,9 +74,9 @@ func (c *ClientImpl) SaveCookie(cookiePath string) error {
 
 func (c *ClientImpl) Clone() Client {
 	client := &ClientImpl{
-		Client: c.Client.CloneBase(),
-		db:     c.db,
-		domain: c.domain,
+		ClientBase: c.ClientBase.CloneBase(),
+		db:         c.db,
+		domain:     c.domain,
 	}
 	client.SetChild(client)
 	client.Reset()
@@ -81,7 +84,7 @@ func (c *ClientImpl) Clone() Client {
 }
 
 func (c *ClientImpl) Reset() {
-	c.Client.Reset()
+	c.ClientBase.Reset()
 	c.SetRequestCallback(func(r *colly.Request) {
 		r.Headers.Set("Host", c.domain.Host)
 		r.Headers.Set("Connection", "keep-alive")
