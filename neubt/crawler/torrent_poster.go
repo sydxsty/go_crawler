@@ -35,6 +35,7 @@ type TorrentPosterImpl struct {
 	client neubt.Client
 
 	tidList map[string]string
+	aidList []string
 
 	formHash     string
 	postTime     string
@@ -85,7 +86,6 @@ func (t *TorrentPosterImpl) SetPostFileName(name string) {
 
 func (t *TorrentPosterImpl) SetPTGENContent(text string) error {
 	t.genTxt = text
-	var aidList []string
 	for _, imgURL := range GetAllImgFromPTGen(text) {
 		imageDownloader, err := util.NewImageDownloader(imgURL)
 		if err != nil {
@@ -99,13 +99,13 @@ func (t *TorrentPosterImpl) SetPTGENContent(text string) error {
 		if err != nil {
 			return errors.Wrap(err, "can not upload poster to neubt")
 		}
-		aidList = append(aidList, aid)
+		t.aidList = append(t.aidList, aid)
 		log.Println("uploaded poster to neubt")
 		time.Sleep(time.Second * 5)
 	}
-	replaced, err := ReplaceImgWithTagID(text, aidList)
+	replaced, err := ReplaceImgWithTagID(text, t.aidList)
 	if err != nil {
-		for _, aid := range aidList {
+		for _, aid := range t.aidList {
 			_ = t.imgUploader.RemoveImage(aid)
 		}
 		return errors.Wrap(err, "can not replace the original txt")
@@ -195,7 +195,12 @@ func (t *TorrentPosterImpl) PostTorrentMultiPart(data []byte) (string, error) {
 	_ = w.WriteField(UTF82GB2312("allownoticeauthor"), UTF82GB2312("1"))
 	_ = w.WriteField(UTF82GB2312("usesig"), UTF82GB2312("1"))
 	_ = w.WriteField(UTF82GB2312("save"), UTF82GB2312(""))
-
+	for _, aid := range t.aidList {
+		_ = w.WriteField(UTF82GB2312("attachupdate["+aid+"]"), UTF82GB2312(""))
+		_ = w.WriteField(UTF82GB2312("attachnew["+aid+"][description]"), UTF82GB2312(""))
+		_ = w.WriteField(UTF82GB2312("attachnew["+aid+"][readperm]"), UTF82GB2312(""))
+		_ = w.WriteField(UTF82GB2312("attachnew["+aid+"][price]"), UTF82GB2312("0"))
+	}
 	pa, _ := w.CreateFormFile(UTF82GB2312("torrent"), UTF82GB2312(t.postFileName+".torrent"))
 	if _, err := pa.Write(data); err != nil {
 		return "", err

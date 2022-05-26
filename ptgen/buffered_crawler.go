@@ -52,7 +52,10 @@ func (b BufferedPTGenImpl) GetBangumiLinkByName(name string) (map[string]string,
 func (b BufferedPTGenImpl) GetBangumiDetailByLink(link string) (map[string]interface{}, error) {
 	results, err := loadPTGenLink(b.db, link)
 	if err == nil {
-		return results, nil
+		success, ok := results["success"].(bool)
+		if ok && success == true {
+			return results, nil
+		}
 	}
 	results, err = b.pg.GetBangumiDetailByLink(link)
 	if err != nil {

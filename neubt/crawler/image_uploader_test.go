@@ -14,8 +14,6 @@ func TestUploadImage(t *testing.T) {
 	assert.NoError(t, err, "error load image")
 	aid, err := iu.UploadImage(file, "jpg")
 	assert.NoError(t, err, "error upload image")
-	err = iu.UseImageInPID("0")
-	assert.NoError(t, err, "error using image")
 	err = iu.RemoveImage(aid)
 	assert.NoError(t, err, "error remove image")
 }

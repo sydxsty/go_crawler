@@ -77,6 +77,10 @@ func (p *PTGenImpl) GetBangumiDetailByLink(link string) (map[string]interface{},
 	if err != nil {
 		return nil, err
 	}
+	success, ok := result["success"].(bool)
+	if !ok || !success {
+		return nil, errors.New("cloudflare worker network error")
+	}
 	return result, nil
 }
 

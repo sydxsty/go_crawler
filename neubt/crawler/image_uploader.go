@@ -15,15 +15,12 @@ import (
 type ImageUploader interface {
 	// UploadImage upload the image, return the image AID
 	UploadImage(data []byte, fileType string) (string, error)
-	// UseImageInPID use the image in pid
-	UseImageInPID(pid string) error
 	RemoveImage(aid string) error
 }
 
 type ImageUploaderImpl struct {
 	client         neubt.Client
 	uploadURL      string
-	useInThreadURL string
 	deleteImageURL string
 	uid            string
 	hash           string
@@ -33,7 +30,6 @@ func NewImageUploader(client neubt.Client, uid, hash string) ImageUploader {
 	i := &ImageUploaderImpl{
 		client:         client.Clone(),
 		uploadURL:      `/misc.php?mod=swfupload&operation=upload&simple=1&type=image`,
-		useInThreadURL: `/forum.php?mod=ajax&action=imagelist&pid=`,
 		deleteImageURL: `/forum.php?mod=ajax&action=deleteattach&inajax=yes&tid=0&pid=0&aids[]=`,
 		uid:            uid,
 		hash:           hash,
@@ -68,11 +64,6 @@ func (i *ImageUploaderImpl) UploadImage(data []byte, fileType string) (string, e
 	} else {
 		return v[0], nil
 	}
-}
-
-func (i *ImageUploaderImpl) UseImageInPID(pid string) error {
-	_, err := i.client.SyncVisit(i.useInThreadURL + url.QueryEscape(pid))
-	return err
 }
 
 func (i *ImageUploaderImpl) RemoveImage(aid string) error {
