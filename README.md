@@ -4,7 +4,7 @@
 
 # NEUBT爬虫
 编译入口地址
-https://github.com/sydxsty/go_crawler/blob/master/neubt/rss/main.go
+neubt/cmd/rss/rss.go
 ## 使用方法
 1. 编译（或者直接下载release界面的）
 2. 在运行目录上新建data文件夹
@@ -27,7 +27,7 @@ thread_water_mark: 1695272    #第一次启动时候从哪个ID开始爬
 
 # 自动发种
 编译入口地址
-https://github.com/sydxsty/go_crawler/blob/master/neubt/bgm_auto_poster/main.go
+neubt/cmd/bgm_auto_poster/bgm_auto_poster.go
 ## 工作流程
 1. 爬取bangumi上更新的种子
 2. 查询ptgen上是否有对应动漫信息
