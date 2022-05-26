@@ -4,12 +4,14 @@ import (
 	"bytes"
 	"crawler/neubt"
 	"crawler/neubt/html"
-	"errors"
+	"crawler/util"
 	"github.com/gocolly/colly/v2"
 	"github.com/gogf/gf/v2/encoding/gcharset"
+	"github.com/pkg/errors"
 	"log"
 	"mime/multipart"
 	"strings"
+	"time"
 )
 
 // TorrentPoster post torrent
@@ -24,7 +26,7 @@ type TorrentPoster interface {
 	// SetPostFileName the torrent attach name
 	SetPostFileName(name string)
 	// SetPTGENContent set content
-	SetPTGENContent(text string)
+	SetPTGENContent(text string) error
 	SetMediaInfoContent(text string)
 	SetCommentContent(texts ...string)
 }
@@ -47,6 +49,8 @@ type TorrentPosterImpl struct {
 	mediaInfoText string // media info
 	comment       string // header message, torrent detail
 	postFileName  string // the torrent name showed in thread
+
+	imgUploader ImageUploader
 }
 
 func (t *TorrentPosterImpl) SetTid(tid string) bool {
@@ -79,8 +83,35 @@ func (t *TorrentPosterImpl) SetPostFileName(name string) {
 	t.postFileName = name
 }
 
-func (t *TorrentPosterImpl) SetPTGENContent(text string) {
+func (t *TorrentPosterImpl) SetPTGENContent(text string) error {
 	t.genTxt = text
+	var aidList []string
+	for _, imgURL := range GetAllImgFromPTGen(text) {
+		imageDownloader, err := util.NewImageDownloader(imgURL)
+		if err != nil {
+			return errors.Wrap(err, "can not init image downloader")
+		}
+		data, fileType, err := imageDownloader.Download()
+		if err != nil {
+			return errors.Wrap(err, "can not init download image")
+		}
+		aid, err := t.imgUploader.UploadImage(data, fileType)
+		if err != nil {
+			return errors.Wrap(err, "can not upload poster to neubt")
+		}
+		aidList = append(aidList, aid)
+		log.Println("uploaded poster to neubt")
+		time.Sleep(time.Second * 5)
+	}
+	replaced, err := ReplaceImgWithTagID(text, aidList)
+	if err != nil {
+		for _, aid := range aidList {
+			_ = t.imgUploader.RemoveImage(aid)
+		}
+		return errors.Wrap(err, "can not replace the original txt")
+	}
+	t.genTxt = replaced
+	return nil
 }
 
 func (t *TorrentPosterImpl) SetMediaInfoContent(text string) {
@@ -115,6 +146,11 @@ func NewTorrentPoster(fid string, client neubt.Client) (TorrentPoster, error) {
 	t.special, _ = node.GetInnerString(`.//input[@name="special"]/@value`)
 	t.specialExtra, _ = node.GetInnerString(`.//input[@name="specialextra"]/@value`)
 	t.subject, _ = node.GetInnerString(`.//input[@name="subject"]/@value`)
+	// build the image loader
+	uid, _ := node.GetInnerString(`.//input[@name="uid"]/@value`)
+	hash, _ := node.GetInnerString(`.//input[@name="hash"]/@value`)
+	t.imgUploader = NewImageUploader(client, uid, hash)
+
 	tidNodeList, err := node.GetInnerNodeList(`.//select[@name="typeid"]/option`)
 	if err != nil {
 		return nil, err

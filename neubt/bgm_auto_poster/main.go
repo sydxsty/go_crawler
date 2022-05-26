@@ -114,7 +114,10 @@ func main() {
 				log.Println("failed to get text from ptgen detail: ", err)
 				return
 			}
-			poster.SetPTGENContent(text)
+			err = poster.SetPTGENContent(text)
+			if err != nil {
+				log.Println("failed to SetPTGENContent: ", err)
+			}
 			mediaInfo, err := GetMediaInfoFromWEBUI(ti.InfoHash, p.Webui)
 			if err != nil {
 				log.Println("failed to get media info: ", err)
