@@ -18,20 +18,17 @@ type ClientImpl struct {
 func NewClient() (Client, error) {
 	client := &ClientImpl{}
 	var err error
-	client.ClientBase, err = util.NewClientBase("https://ptgen.frfx.workers.dev")
+	client.ClientBase, err = util.NewClientBase(client, "https://ptgen.frfx.workers.dev")
 	if err != nil {
 		return nil, err
 	}
-	client.SetChild(client)
 	client.Reset()
 	return client, nil
 }
 
 func (c *ClientImpl) Clone() Client {
-	client := &ClientImpl{
-		ClientBase: c.ClientBase.CloneBase(),
-	}
-	client.SetChild(client)
+	client := &ClientImpl{}
+	client.ClientBase = c.ClientBase.CloneBase(client)
 	client.Reset()
 	return client
 }

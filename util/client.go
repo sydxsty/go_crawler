@@ -37,15 +37,11 @@ type ClientBase interface {
 	Cookies() []*http.Cookie
 
 	// CloneBase a new ClientBase
-	CloneBase() ClientBase
+	CloneBase(ClientBase) ClientBase
 
 	// Reset clear all req and resp func
 	// also call this func to init a client
 	Reset()
-
-	// SetChild set the child object on ClientBase
-	// the class can init after child class is set
-	SetChild(ClientBase)
 }
 
 type ClientBaseImpl struct {
@@ -55,7 +51,7 @@ type ClientBaseImpl struct {
 }
 
 // NewClientBase return a new ClientBase, called by constructor of child Client
-func NewClientBase(link string) (ClientBase, error) {
+func NewClientBase(child ClientBase, link string) (ClientBase, error) {
 	client := &ClientBaseImpl{}
 	client.collector = colly.NewCollector(
 		colly.UserAgent("Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 UBrowser/6.2.4098.3 Safari/537.36"),
@@ -66,6 +62,7 @@ func NewClientBase(link string) (ClientBase, error) {
 	if err != nil {
 		return nil, err
 	}
+	client.child = child
 	return client, nil
 }
 
@@ -122,9 +119,9 @@ func (c *ClientBaseImpl) Cookies() []*http.Cookie {
 	return c.collector.Cookies(absoluteURL)
 }
 
-func (c *ClientBaseImpl) CloneBase() ClientBase {
+func (c *ClientBaseImpl) CloneBase(child ClientBase) ClientBase {
 	client := &ClientBaseImpl{
-		child:     nil,
+		child:     child,
 		collector: c.collector,
 		domain:    c.domain,
 	}
@@ -133,8 +130,4 @@ func (c *ClientBaseImpl) CloneBase() ClientBase {
 
 func (c *ClientBaseImpl) Reset() {
 	c.collector = c.collector.Clone()
-}
-
-func (c *ClientBaseImpl) SetChild(child ClientBase) {
-	c.child = child
 }

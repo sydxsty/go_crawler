@@ -32,12 +32,11 @@ func NewClient(db storage.KVStorage) (Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	client.ClientBase, err = util.NewClientBase(link)
+	client.ClientBase, err = util.NewClientBase(client, link)
 	if err != nil {
 		return nil, err
 	}
 	client.db = db
-	client.SetChild(client)
 	client.Reset()
 	return client, nil
 }
@@ -74,11 +73,11 @@ func (c *ClientImpl) SaveCookie(cookiePath string) error {
 
 func (c *ClientImpl) Clone() Client {
 	client := &ClientImpl{
-		ClientBase: c.ClientBase.CloneBase(),
+		ClientBase: nil,
 		db:         c.db,
 		domain:     c.domain,
 	}
-	client.SetChild(client)
+	client.ClientBase = c.ClientBase.CloneBase(client)
 	client.Reset()
 	return client
 }
