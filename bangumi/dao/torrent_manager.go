@@ -62,6 +62,9 @@ func (t *TorrentManager) SetTorrentPostedState(animeInfoHash string) bool {
 
 // CanDownloadFromBangumi this is a filter to avoid download same kind of torrents from site
 func (t *TorrentManager) CanDownloadFromBangumi(info *BangumiTorrentInfo) error {
+	if info.Detail.TeamName == "" {
+		return errors.New("no team name found in info")
+	}
 	name, err := info.GetCHNName()
 	if err != nil {
 		return errors.New("torrent name is empty")
@@ -73,15 +76,6 @@ func (t *TorrentManager) CanDownloadFromBangumi(info *BangumiTorrentInfo) error 
 	if v := regexp.MustCompile(`((繁體)|(繁日)|(CHT)|(BIG5)|(繁体))`).FindAllString(info.Title, -1); len(v) != 0 {
 		return errors.New("is not sc, skip download, " + v[0])
 	}
-
-	if v := regexp.MustCompile(`((NC-Raws)|(NaN-Raws)|(ANi)|(TD-RAWS)|(国漫))`).FindAllString(info.Title, -1); len(v) != 0 {
-		return errors.New("wrong team, skip download, " + v[0])
-	}
-
-	if v := regexp.MustCompile(`((喵萌奶茶屋)|(LoliHouse)|(喵萌Production)|(字幕组))`).FindAllString(info.Title, -1); len(v) == 0 {
-		return errors.New("does not get correct team" + info.Title)
-	}
-
 	detail := make(map[string]interface{})
 	// get the uploaded team of current episode
 	v, err := t.getState(name, info.Detail.Episode)

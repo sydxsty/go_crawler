@@ -1,9 +1,8 @@
 package dao
 
 import (
+	bgm "crawler/bangumi/anime_control"
 	"errors"
-	"log"
-	"regexp"
 )
 
 type BangumiTorrentInfo struct {
@@ -54,6 +53,7 @@ func NewTorrentInfoFromMap(raw map[string]interface{}) (*BangumiTorrentInfo, err
 }
 
 func (b *BangumiTorrentInfo) InitTorrentDetail(miscList []map[string]interface{}) {
+	bgmFilter := bgm.NewBangumiFilter()
 	d := &BangumiTorrentDetail{}
 	b.Detail = d
 	d.OriginalTitle = b.Title
@@ -67,62 +67,37 @@ func (b *BangumiTorrentInfo) InitTorrentDetail(miscList []map[string]interface{}
 					d.TorrentChsName, _ = translate["zh_cn"].(string)
 					d.TorrentEngName, _ = translate["en"].(string)
 					d.TorrentJpnName, _ = translate["ja"].(string)
-				case "team":
-					d.TeamName = misc["name"].(string)
-				case "resolution":
-					if len(d.Resolution) != 0 {
-						d.Resolution += " "
-					}
-					d.Resolution += misc["name"].(string)
-				case "format":
-					if len(d.Format) != 0 {
-						d.Format += " "
-					}
-					d.Format += misc["name"].(string)
 				case "lang":
 					if len(d.Language) != 0 {
 						d.Language += " "
 					}
 					d.Language += misc["name"].(string)
-				case "misc":
-					break
 				default:
-					log.Println(misc, "not found")
+					break
 				}
 			}
 		}
 	}
-	getSeason := func() string {
-		var episode string
-		multi := regexp.MustCompile(`(( )|(【)|(\[))+([0-9]{1,2})(-)([0-9]{1,2})(( )|(】)|(]))`).FindAllString(d.OriginalTitle, -1)
-		for _, param := range multi {
-			param = regexp.MustCompile(`([0-9]{1,2})(-)([0-9]{1,2})`).FindString(param)
-			episode += param
+	// TODO: get language detail
+	// TODO: get bangumi anime name detail
+	d.Resolution = getString(bgmFilter.GetResolution(b.Title))
+	d.Format = getString(bgmFilter.GetMediaInfo(b.Title))
+	d.TeamName = getString(bgmFilter.GetTeam(b.Title))
+	d.Episode = getString([]string{getString(bgmFilter.GetMovieType(b.Title)), bgmFilter.GetSingleEpisode(b.Title), bgmFilter.GetMultiEpisode(b.Title)})
+}
+
+func getString(strList []string) string {
+	res := ""
+	for _, str := range strList {
+		if str == "" {
+			continue
 		}
-		return episode
+		if len(res) != 0 {
+			res += " "
+		}
+		res += str
 	}
-	getEpisode := func() string {
-		var episode string
-		single := regexp.MustCompile(`(( )|\[|【|第)+([0-9]{2,3})(( )|]|】|话|話)`).FindAllString(d.OriginalTitle, -1)
-		if single == nil {
-			single = regexp.MustCompile(`(( )|\[|【|第)+(1)([0-9]{2,3})(( )|]|】|话|話)`).FindAllString(d.OriginalTitle, -1)
-		}
-		for _, param := range single {
-			param = regexp.MustCompile(`([0-9]{1,4})`).FindString(param)
-			episode += param
-		}
-		return episode
-	}
-	getOVA := func() string {
-		var episode string
-		movie := regexp.MustCompile(`(\W(剧场版)|(OVA)|(OAD)\W)`).FindAllString(d.OriginalTitle, -1)
-		for _, param := range movie {
-			param = regexp.MustCompile(`((剧场版)|(OVA)|(OAD))`).FindString(param)
-			episode += param
-		}
-		return episode
-	}
-	d.Episode = getSeason() + getEpisode() + getOVA()
+	return res
 }
 
 func (b *BangumiTorrentInfo) GetCHNName() (string, error) {
