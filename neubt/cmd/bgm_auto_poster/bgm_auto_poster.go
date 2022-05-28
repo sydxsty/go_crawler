@@ -24,6 +24,7 @@ type Poster struct {
 	bgmTrMgr      *dao.TorrentManager
 	ptgenClient   ptgen.Client
 	ptgen         ptgen.PTGen
+	ani           *dao.AnimeDB
 }
 
 func NewPoster() *Poster {
@@ -38,6 +39,11 @@ func NewPoster() *Poster {
 		return nil
 	}
 	nb := neubt.NewNeuBT()
+	ani, err := dao.NewAnimeDB()
+	if err != nil {
+		log.Println("init ani db failed")
+		return nil
+	}
 	return &Poster{
 		NeuBT:         nb,
 		bgmClient:     bgmClient,
@@ -46,6 +52,7 @@ func NewPoster() *Poster {
 		bgmTrMgr:      dao.NewTorrentManager(nb.KVS),
 		ptgenClient:   ptgenClient,
 		ptgen:         ptgen.NewBufferedPTGen(ptgenClient, nb.KVS),
+		ani:           ani,
 	}
 }
 
@@ -121,9 +128,6 @@ func main() {
 			if err != nil {
 				log.Println("failed to SetPTGENContent: ", err)
 			}
-			ti.UpdateFinalInformation(func() (string, error) {
-				return ptgen.GetCHSNameFromDetail(detail)
-			})
 			mediaInfo, err := GetMediaInfoFromWEBUI(ti.InfoHash, p.Webui)
 			if err != nil {
 				log.Println("failed to get media info: ", err)
@@ -160,16 +164,27 @@ func main() {
 }
 
 func (p *Poster) GetTorrentPTGenDetail(info *dao.BangumiTorrentInfo) (map[string]interface{}, error) {
+	alias := p.ani.GetAliasCHSName(info.Title)
+	if info.MustGetCHSName() == "" {
+		info.SetReleaseCHSName(func() (string, error) {
+			return alias, nil
+		})
+	}
 	links, err := p.ptgen.GetBangumiLinkByNames(
 		info.MustGetJPNName(),
 		info.MustGetCHSName(),
-		info.MustGetENGName())
+		info.MustGetENGName(),
+		alias)
 	if err != nil {
 		return nil, err
 	}
-	for _, v := range links {
+	for k, v := range links {
 		result, err := p.ptgen.GetBangumiDetailByLink(v)
 		if err == nil {
+			// update chinese name
+			info.SetReleaseCHSName(func() (string, error) {
+				return k, nil
+			})
 			return result, nil
 		}
 	}
