@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"crawler/bangumi"
 	"crawler/bangumi/crawler"
 	"crawler/bangumi/dao"
@@ -10,7 +9,6 @@ import (
 	"crawler/ptgen"
 	"crawler/qbt"
 	"crawler/util"
-	"encoding/json"
 	"github.com/pkg/errors"
 	"log"
 	"os"
@@ -226,20 +224,12 @@ func UpdateWithTorrentInfo(poster neubtCrawler.TorrentPoster, info *dao.BangumiT
 		info.MustGetLanguage(),
 		info.MustGetResolution(),
 	)
-	form := func(v interface{}) string {
-		detail, _ := json.Marshal(v)
-		var out bytes.Buffer
-		if err := json.Indent(&out, detail, "", "\t"); err != nil {
-			return ""
-		}
-		return out.String()
-	}
 	poster.SetCommentContent(
 		"[code]",
 		"Debug info:",
 		"原种标题："+info.Title,
-		"种子信息："+form(info.Detail),
-		"种子内容："+form(info.Content),
+		"种子信息："+info.GetDetail(),
+		"种子内容："+info.GetContent(),
 		"[/code]",
 	)
 	return nil

@@ -2,6 +2,7 @@ package dao
 
 import (
 	bgm "crawler/bangumi/anime_control"
+	"crawler/util"
 	"errors"
 	"log"
 )
@@ -13,8 +14,8 @@ type BangumiTorrentInfo struct {
 	TeamId    string
 	TagIds    []interface{}
 	InfoHash  string
-	Content   []interface{}
-	Detail    *BangumiTorrentDetail
+	content   []interface{}
+	detail    *BangumiTorrentDetail
 }
 
 type BangumiTorrentDetail struct {
@@ -48,7 +49,7 @@ func NewTorrentInfoFromMap(raw map[string]interface{}) (*BangumiTorrentInfo, err
 	if b.InfoHash, ok = raw["infoHash"].(string); !ok {
 		return nil, errors.New("cannot get torrent info hash")
 	}
-	if b.Content, ok = raw["content"].([]interface{}); !ok {
+	if b.content, ok = raw["content"].([]interface{}); !ok {
 		return nil, errors.New("cannot get torrent content")
 	}
 	return b, nil
@@ -56,7 +57,7 @@ func NewTorrentInfoFromMap(raw map[string]interface{}) (*BangumiTorrentInfo, err
 
 func (b *BangumiTorrentInfo) InitTorrentDetail(miscList []map[string]interface{}) {
 	d := &BangumiTorrentDetail{}
-	b.Detail = d
+	b.detail = d
 	d.torrentDownloadURL = `/download/torrent/` + b.TorrentId + `/` + b.TorrentId + `.torrent`
 	for _, misc := range miscList {
 		for _, cate := range b.TagIds {
@@ -105,75 +106,75 @@ func getString(strList []string) string {
 }
 
 func (b *BangumiTorrentInfo) GetTorrentDownloadURL() (string, error) {
-	if b.Detail == nil {
+	if b.detail == nil {
 		return "", errors.New("not init")
 	}
-	if len(b.Detail.torrentChsName) != 0 {
-		return b.Detail.torrentDownloadURL, nil
+	if len(b.detail.torrentChsName) != 0 {
+		return b.detail.torrentDownloadURL, nil
 	}
 	return "", errors.New("can not get torrent url")
 }
 
 func (b *BangumiTorrentInfo) MustGetCHSName() string {
-	if b.Detail == nil {
+	if b.detail == nil {
 		return ""
 	}
-	if len(b.Detail.torrentChsName) != 0 {
-		return b.Detail.torrentChsName
+	if len(b.detail.torrentChsName) != 0 {
+		return b.detail.torrentChsName
 	}
-	if len(b.Detail.torrentEngName) != 0 {
-		return b.Detail.torrentEngName
+	if len(b.detail.torrentEngName) != 0 {
+		return b.detail.torrentEngName
 	}
 	return ""
 }
 
 func (b *BangumiTorrentInfo) MustGetENGName() string {
-	if b.Detail == nil {
+	if b.detail == nil {
 		return ""
 	}
-	return b.Detail.torrentEngName
+	return b.detail.torrentEngName
 }
 
 func (b *BangumiTorrentInfo) MustGetJPNName() string {
-	if b.Detail == nil {
+	if b.detail == nil {
 		return ""
 	}
-	return b.Detail.torrentJpnName
+	return b.detail.torrentJpnName
 }
 
 func (b *BangumiTorrentInfo) MustGetTeamName() string {
-	if b.Detail == nil {
+	if b.detail == nil {
 		return ""
 	}
-	return b.Detail.teamName
+	return b.detail.teamName
 }
 
 func (b *BangumiTorrentInfo) MustGetResolution() string {
-	if b.Detail == nil {
+	if b.detail == nil {
 		return ""
 	}
-	return b.Detail.resolution
+	return b.detail.resolution
 }
 
 func (b *BangumiTorrentInfo) MustGetEpisode() string {
-	if b.Detail == nil {
+	if b.detail == nil {
 		return ""
 	}
-	return b.Detail.episode
+	return b.detail.episode
 }
 
 func (b *BangumiTorrentInfo) MustGetFormat() string {
-	if b.Detail == nil {
+	if b.detail == nil {
 		return ""
 	}
-	return b.Detail.format
+	return b.detail.format
 }
 
 func (b *BangumiTorrentInfo) MustGetLanguage() string {
-	if b.Detail == nil {
+	if b.detail == nil {
 		return ""
 	}
-	return b.Detail.language
+	return b.detail.language
 }
 
 func (b *BangumiTorrentInfo) UpdateFinalInformation(overrideCHSName func() (string, error)) {
@@ -181,11 +182,19 @@ func (b *BangumiTorrentInfo) UpdateFinalInformation(overrideCHSName func() (stri
 		name, err := overrideCHSName()
 		if err == nil && name != "" {
 			log.Println("set torrent chsName to: ", name)
-			b.Detail.torrentChsName = name
+			b.detail.torrentChsName = name
 		}
 	}
-	target := b.bgmFilter.GetSeasonType(b.Detail.torrentChsName)
+	target := b.bgmFilter.GetSeasonType(b.detail.torrentChsName)
 	if len(target) == 0 { // the season is empty
-		b.Detail.torrentChsName += getString(b.bgmFilter.GetSeasonType(b.Title))
+		b.detail.torrentChsName += getString(b.bgmFilter.GetSeasonType(b.Title))
 	}
+}
+
+func (b *BangumiTorrentInfo) GetContent() string {
+	return util.GetJsonStrFromStruct(b.content)
+}
+
+func (b *BangumiTorrentInfo) GetDetail() string {
+	return util.GetJsonStrFromStruct(b.detail)
 }

@@ -1,6 +1,8 @@
 package util
 
 import (
+	"bytes"
+	"encoding/json"
 	wrapper "github.com/pkg/errors"
 	"net/url"
 	"strings"
@@ -24,4 +26,13 @@ func MustGetAbsoluteURL(domain *url.URL, u string) string {
 		panic(err)
 	}
 	return absoluteURL
+}
+
+func GetJsonStrFromStruct(v interface{}) string {
+	detail, _ := json.Marshal(v)
+	var out bytes.Buffer
+	if err := json.Indent(&out, detail, "", "\t"); err != nil {
+		return ""
+	}
+	return out.String()
 }
