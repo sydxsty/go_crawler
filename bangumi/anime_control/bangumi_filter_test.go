@@ -149,5 +149,6 @@ func init() {
 		"[Lilith-Raws] 不起眼女主角培育法 / Saenai Heroine no Sodatekata Flat [00-11][Baha][WEB-DL][1080p][AVC AAC][CHT][MP4]",
 		"[NC-Raws] 键等 / Kaginado - 06 [B-Global][WEB-DL][1080p][AVC AAC][Multiple Subtitle][MKV]",
 		"【极影字幕社】LoveLive! 虹咲学园学园偶像同好会 第2期 第08集 加料剪辑版 GB_CN HEVC_opus 1080p",
+		"【千夏字幕组】【来玩游戏吧 / 游戏3人娘_Asobi Asobase】[第01-12话][BDRip_1080p_AVC][简体][修正合集]",
 	}
 }

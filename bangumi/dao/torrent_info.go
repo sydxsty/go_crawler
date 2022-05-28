@@ -83,7 +83,7 @@ func (b *BangumiTorrentInfo) InitTorrentDetail(miscList []map[string]interface{}
 	// TODO: get bangumi anime name detail
 	d.Resolution = getString(b.bgmFilter.GetResolution(b.Title))
 	d.Format = getString(b.bgmFilter.GetMediaInfo(b.Title))
-	d.TeamName = getString(b.bgmFilter.GetTeam(b.Title))
+	d.TeamName = getStringWithDelim(b.bgmFilter.GetTeam(b.Title), "&")
 	d.Episode = getString([]string{
 		getString(b.bgmFilter.GetMovieType(b.Title)),
 		b.bgmFilter.GetSingleEpisode(b.Title),
@@ -92,13 +92,17 @@ func (b *BangumiTorrentInfo) InitTorrentDetail(miscList []map[string]interface{}
 }
 
 func getString(strList []string) string {
+	return getStringWithDelim(strList, " ")
+}
+
+func getStringWithDelim(strList []string, delim string) string {
 	res := ""
 	for _, str := range strList {
 		if str == "" {
 			continue
 		}
 		if len(res) != 0 {
-			res += " "
+			res += delim
 		}
 		res += str
 	}
