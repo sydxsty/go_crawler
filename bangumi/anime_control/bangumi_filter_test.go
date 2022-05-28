@@ -66,7 +66,7 @@ func TestGetEpisode(t *testing.T) {
 	for _, in := range testCase {
 		res1 := episodeFilter.GetSingleEpisode(in)
 		res2 := episodeFilter.GetMultiEpisode(in)
-		res3 := episodeFilter.GetMovieType(in)
+		res3 := episodeFilter.GetSeasonType(in)
 		log.Printf("single: %s, multi: %s, movie: %s", res1, res2, res3)
 	}
 }
@@ -101,7 +101,8 @@ func TestIntegrate(t *testing.T) {
 		log.Printf("GetResolution: %s", getString(bgmFilter.GetResolution(in)))
 		log.Printf("GetMediaInfo: %s", getString(bgmFilter.GetMediaInfo(in)))
 		log.Printf("GetTeam: %s", getString(bgmFilter.GetTeam(in)))
-		log.Printf("GetSingleEpisode: %s", getString([]string{getString(bgmFilter.GetMovieType(in)), bgmFilter.GetSingleEpisode(in), bgmFilter.GetMultiEpisode(in)}))
+		log.Printf("GetSingleEpisode: %s", getString([]string{getString(bgmFilter.GetSeasonType(in)), bgmFilter.GetSingleEpisode(in), bgmFilter.GetMultiEpisode(in)}))
+		log.Printf("GetMovie: %s", getString(bgmFilter.GetMovieType(in)))
 	}
 }
 
@@ -147,5 +148,6 @@ func init() {
 		"【极影字幕社】★10月新番 结城友奈是勇者 大满开之章 第07话 GB 1080P MP4（字幕社招人内详）",
 		"[Lilith-Raws] 不起眼女主角培育法 / Saenai Heroine no Sodatekata Flat [00-11][Baha][WEB-DL][1080p][AVC AAC][CHT][MP4]",
 		"[NC-Raws] 键等 / Kaginado - 06 [B-Global][WEB-DL][1080p][AVC AAC][Multiple Subtitle][MKV]",
+		"【极影字幕社】LoveLive! 虹咲学园学园偶像同好会 第2期 第08集 加料剪辑版 GB_CN HEVC_opus 1080p",
 	}
 }

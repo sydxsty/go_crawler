@@ -11,6 +11,7 @@ type BangumiFilter struct {
 	finEpisode       *regexp.Regexp
 	defaultDelimiter string
 	coarseDelimiter  string
+	seasonRegexp     *regexp.Regexp
 	movieRegexp      *regexp.Regexp
 	teamRegexp       *regexp.Regexp
 	resolutionRegexp *regexp.Regexp
@@ -20,11 +21,12 @@ type BangumiFilter struct {
 func NewBangumiFilter() *BangumiFilter {
 	bf := &BangumiFilter{
 		multiEpisode:     regexp.MustCompile(`[ 【\[]([0-9]{1,2}-[0-9]{1,2})[】\] ]`),
-		singleEpisode:    regexp.MustCompile(`[ 【\[第]([0-9]{1,3})[】\] 话話]`),
+		singleEpisode:    regexp.MustCompile(`[ 【\[第]([0-9]{1,3})[】\] 话話集]`),
 		finEpisode:       regexp.MustCompile(`[ 【\[](?i)( ?fin)[】\] ]`),
 		defaultDelimiter: " []&/【】()（）",
 		coarseDelimiter:  "[]/()【】",
-		movieRegexp:      regexp.MustCompile(`剧场版|OVA|OAD|(?i)Movie|([sS](0|)[0-9]+)|第.季`),
+		seasonRegexp:     regexp.MustCompile(`([sS](0|)[0-9]+)|第.季|第.期`),
+		movieRegexp:      regexp.MustCompile(`剧场版|OVA|OAD|(?i)Movie`),
 		// currently, |字幕社|工作室 are not included in teams
 		teamRegexp:       regexp.MustCompile(`喵萌|LoliHouse|字幕组`),
 		resolutionRegexp: regexp.MustCompile("[0-9]{3,}[pPiI]|[24][kK]|[0-9]{3,4}x[0-9]{3,4}"),
@@ -64,6 +66,10 @@ func (bf *BangumiFilter) GetSingleEpisode(episode string) string {
 	return strList[0][1]
 }
 
+func (bf *BangumiFilter) GetSeasonType(title string) []string {
+	return GetResultWithSplit(title, bf.defaultDelimiter, bf.seasonRegexp)
+}
+
 func (bf *BangumiFilter) GetMovieType(title string) []string {
 	return GetResultWithSplit(title, bf.defaultDelimiter, bf.movieRegexp)
 }
@@ -85,7 +91,7 @@ func GetResultWithSplit(title, delim string, regexp *regexp.Regexp) []string {
 		}
 	}
 	var resList []string
-	for k, _ := range resMap {
+	for k := range resMap {
 		resList = append(resList, k)
 	}
 	return resList

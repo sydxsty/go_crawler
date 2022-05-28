@@ -3,9 +3,11 @@ package dao
 import (
 	bgm "crawler/bangumi/anime_control"
 	"errors"
+	"log"
 )
 
 type BangumiTorrentInfo struct {
+	bgmFilter *bgm.BangumiFilter
 	Title     string // raw title
 	TorrentId string
 	TeamId    string
@@ -16,20 +18,20 @@ type BangumiTorrentInfo struct {
 }
 
 type BangumiTorrentDetail struct {
-	OriginalTitle      string
-	TorrentDownloadURL string
-	TorrentChsName     string
-	TorrentEngName     string
-	TorrentJpnName     string
-	TeamName           string
-	Resolution         string
-	Format             string
-	Language           string
-	Episode            string
+	torrentDownloadURL string
+	torrentChsName     string
+	torrentEngName     string
+	torrentJpnName     string
+	teamName           string
+	resolution         string
+	format             string
+	language           string
+	episode            string
 }
 
 func NewTorrentInfoFromMap(raw map[string]interface{}) (*BangumiTorrentInfo, error) {
 	b := &BangumiTorrentInfo{}
+	b.bgmFilter = bgm.NewBangumiFilter()
 	ok := false
 	if b.Title, ok = raw["title"].(string); !ok {
 		return nil, errors.New("cannot get title")
@@ -53,25 +55,23 @@ func NewTorrentInfoFromMap(raw map[string]interface{}) (*BangumiTorrentInfo, err
 }
 
 func (b *BangumiTorrentInfo) InitTorrentDetail(miscList []map[string]interface{}) {
-	bgmFilter := bgm.NewBangumiFilter()
 	d := &BangumiTorrentDetail{}
 	b.Detail = d
-	d.OriginalTitle = b.Title
-	d.TorrentDownloadURL = `/download/torrent/` + b.TorrentId + `/` + b.TorrentId + `.torrent`
+	d.torrentDownloadURL = `/download/torrent/` + b.TorrentId + `/` + b.TorrentId + `.torrent`
 	for _, misc := range miscList {
 		for _, cate := range b.TagIds {
 			if misc["_id"] == cate {
 				switch misc["type"] {
 				case "bangumi":
 					translate := misc["locale"].(map[string]interface{})
-					d.TorrentChsName, _ = translate["zh_cn"].(string)
-					d.TorrentEngName, _ = translate["en"].(string)
-					d.TorrentJpnName, _ = translate["ja"].(string)
+					d.torrentChsName, _ = translate["zh_cn"].(string)
+					d.torrentEngName, _ = translate["en"].(string)
+					d.torrentJpnName, _ = translate["ja"].(string)
 				case "lang":
-					if len(d.Language) != 0 {
-						d.Language += " "
+					if len(d.language) != 0 {
+						d.language += " "
 					}
-					d.Language += misc["name"].(string)
+					d.language += misc["name"].(string)
 				default:
 					break
 				}
@@ -80,10 +80,14 @@ func (b *BangumiTorrentInfo) InitTorrentDetail(miscList []map[string]interface{}
 	}
 	// TODO: get language detail
 	// TODO: get bangumi anime name detail
-	d.Resolution = getString(bgmFilter.GetResolution(b.Title))
-	d.Format = getString(bgmFilter.GetMediaInfo(b.Title))
-	d.TeamName = getString(bgmFilter.GetTeam(b.Title))
-	d.Episode = getString([]string{getString(bgmFilter.GetMovieType(b.Title)), bgmFilter.GetSingleEpisode(b.Title), bgmFilter.GetMultiEpisode(b.Title)})
+	d.resolution = getString(b.bgmFilter.GetResolution(b.Title))
+	d.format = getString(b.bgmFilter.GetMediaInfo(b.Title))
+	d.teamName = getString(b.bgmFilter.GetTeam(b.Title))
+	d.episode = getString([]string{
+		getString(b.bgmFilter.GetMovieType(b.Title)),
+		b.bgmFilter.GetSingleEpisode(b.Title),
+		b.bgmFilter.GetMultiEpisode(b.Title),
+	})
 }
 
 func getString(strList []string) string {
@@ -100,15 +104,88 @@ func getString(strList []string) string {
 	return res
 }
 
-func (b *BangumiTorrentInfo) GetCHNName() (string, error) {
+func (b *BangumiTorrentInfo) GetTorrentDownloadURL() (string, error) {
 	if b.Detail == nil {
-		return "", errors.New("torrent detail is not init")
+		return "", errors.New("not init")
 	}
-	if len(b.Detail.TorrentChsName) != 0 {
-		return b.Detail.TorrentChsName, nil
+	if len(b.Detail.torrentChsName) != 0 {
+		return b.Detail.torrentDownloadURL, nil
 	}
-	if len(b.Detail.TorrentEngName) != 0 {
-		return b.Detail.TorrentEngName, nil
+	return "", errors.New("can not get torrent url")
+}
+
+func (b *BangumiTorrentInfo) MustGetCHSName() string {
+	if b.Detail == nil {
+		return ""
 	}
-	return "", errors.New("no valid torrent chs name found")
+	if len(b.Detail.torrentChsName) != 0 {
+		return b.Detail.torrentChsName
+	}
+	if len(b.Detail.torrentEngName) != 0 {
+		return b.Detail.torrentEngName
+	}
+	return ""
+}
+
+func (b *BangumiTorrentInfo) MustGetENGName() string {
+	if b.Detail == nil {
+		return ""
+	}
+	return b.Detail.torrentEngName
+}
+
+func (b *BangumiTorrentInfo) MustGetJPNName() string {
+	if b.Detail == nil {
+		return ""
+	}
+	return b.Detail.torrentJpnName
+}
+
+func (b *BangumiTorrentInfo) MustGetTeamName() string {
+	if b.Detail == nil {
+		return ""
+	}
+	return b.Detail.teamName
+}
+
+func (b *BangumiTorrentInfo) MustGetResolution() string {
+	if b.Detail == nil {
+		return ""
+	}
+	return b.Detail.resolution
+}
+
+func (b *BangumiTorrentInfo) MustGetEpisode() string {
+	if b.Detail == nil {
+		return ""
+	}
+	return b.Detail.episode
+}
+
+func (b *BangumiTorrentInfo) MustGetFormat() string {
+	if b.Detail == nil {
+		return ""
+	}
+	return b.Detail.format
+}
+
+func (b *BangumiTorrentInfo) MustGetLanguage() string {
+	if b.Detail == nil {
+		return ""
+	}
+	return b.Detail.language
+}
+
+func (b *BangumiTorrentInfo) UpdateFinalInformation(overrideCHSName func() (string, error)) {
+	if overrideCHSName != nil {
+		name, err := overrideCHSName()
+		if err == nil && name != "" {
+			log.Println("set torrent chsName to: ", name)
+			b.Detail.torrentChsName = name
+		}
+	}
+	target := b.bgmFilter.GetSeasonType(b.Detail.torrentChsName)
+	if len(target) == 0 { // the season is empty
+		b.Detail.torrentChsName += getString(b.bgmFilter.GetSeasonType(b.Title))
+	}
 }

@@ -93,7 +93,7 @@ func GetTextFromDetail(detail map[string]interface{}) (string, error) {
 	return value, nil
 }
 
-func GetCHNNameFromDetail(detail map[string]interface{}) (string, error) {
+func GetCHSNameFromDetail(detail map[string]interface{}) (string, error) {
 	value, ok := detail["info"].([]interface{})
 	if !ok {
 		return "", errors.New("covert failure")

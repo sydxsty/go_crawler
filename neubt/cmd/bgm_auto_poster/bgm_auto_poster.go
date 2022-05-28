@@ -79,8 +79,13 @@ func main() {
 					log.Println("filter failure reason", err)
 					return
 				}
+				torrentURL, err := ti.GetTorrentDownloadURL()
+				if err != nil {
+					log.Println("filter failure reason", err)
+					return
+				}
 				_, err = crawler.DownloadBangumiTorrentToFile(
-					ti.Detail.TorrentDownloadURL,
+					torrentURL,
 					p.Config.TorrentPath,
 					ti.InfoHash,
 					p.bgmDownloader,
@@ -118,11 +123,9 @@ func main() {
 			if err != nil {
 				log.Println("failed to SetPTGENContent: ", err)
 			}
-			chsName, err := ptgen.GetCHNNameFromDetail(detail)
-			if err == nil && len(chsName) > 0 {
-				log.Println("set torrent chsName to: ", chsName)
-				ti.Detail.TorrentChsName = chsName
-			}
+			ti.UpdateFinalInformation(func() (string, error) {
+				return ptgen.GetCHSNameFromDetail(detail)
+			})
 			mediaInfo, err := GetMediaInfoFromWEBUI(ti.InfoHash, p.Webui)
 			if err != nil {
 				log.Println("failed to get media info: ", err)
@@ -160,9 +163,9 @@ func main() {
 
 func (p *Poster) GetTorrentPTGenDetail(info *dao.BangumiTorrentInfo) (map[string]interface{}, error) {
 	links, err := p.ptgen.GetBangumiLinkByNames(
-		info.Detail.TorrentJpnName,
-		info.Detail.TorrentChsName,
-		info.Detail.TorrentEngName)
+		info.MustGetJPNName(),
+		info.MustGetCHSName(),
+		info.MustGetENGName())
 	if err != nil {
 		return nil, err
 	}
@@ -207,20 +210,21 @@ func (p *Poster) downloadTorrentByLink(link string) error {
 func UpdateWithTorrentInfo(poster neubtCrawler.TorrentPoster, info *dao.BangumiTorrentInfo) error {
 	poster.SetTidByName("连载动画")
 	poster.SetPostFileName(info.Title)
-	if _, err := info.GetCHNName(); err != nil {
+	if info.MustGetCHSName() == "" {
 		return errors.New("no Chinese name or English name found in info")
 	}
-	if info.Detail.TeamName == "" {
+	if info.MustGetTeamName() == "" {
 		return errors.New("no team name found in info")
 	}
-	poster.SetTitle(info.Detail.TorrentChsName,
-		info.Detail.TorrentEngName,
-		info.Detail.TorrentJpnName,
-		info.Detail.Episode,
-		info.Detail.Format,
-		info.Detail.TeamName,
-		info.Detail.Language,
-		info.Detail.Resolution,
+	poster.SetTitle(
+		info.MustGetCHSName(),
+		info.MustGetENGName(),
+		info.MustGetJPNName(),
+		info.MustGetEpisode(),
+		info.MustGetFormat(),
+		info.MustGetTeamName(),
+		info.MustGetLanguage(),
+		info.MustGetResolution(),
 	)
 	form := func(v interface{}) string {
 		detail, _ := json.Marshal(v)
