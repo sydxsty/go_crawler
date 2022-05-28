@@ -23,14 +23,14 @@ func TestSplit(t *testing.T) {
 			"V2",
 			"mp4",
 		},
-		"The Last Son 2021.mkv": {
+		"【The Last Son 2021.mkv】": {
 			"The",
 			"Last",
 			"Son",
 			"2021",
 			"mkv",
 		},
-		"Midway 2019 2160p CAN UHD Blu-ray HEVC DTS-HD MA 5.1-THDBST@HDSky.nfo": {
+		"Midway 2019 2160p CAN UHD Blu-ray HEVC DTS-HD MA 5.1-[THDBST@HDSky.nfo]": {
 			"Midway",
 			"2019",
 			"2160p",
@@ -50,7 +50,7 @@ func TestSplit(t *testing.T) {
 		},
 	}
 	for k, v := range unit {
-		actual := SplitByDelimiter(k, " -.@&[]")
+		actual := SplitByDelimiter(k, " -.@&[]【】")
 		for k2, v2 := range v {
 			if actual[k2] != v2 {
 				t.Errorf("Split(%s) = %s; expected %s", k, actual[k2], v2)
@@ -122,6 +122,7 @@ func getString(strList []string) string {
 
 func init() {
 	testCase = []string{
+		"【幻樱字幕组】【剧场版】【偶像梦幻祭 -Road to Show!!-  Ensemble Stars!! -Road to Show!!】【BDrip】【GB_MP4】【1920X1080】",
 		"[NC-Raws] 杜鵑婚約 [特別篇] / Kakkou no Iinazuke (A Couple of Cuckoos) - 05 (Baha 1920x1080 AVC AAC MP4)",
 		"【喵萌Production】★04月新番★[歌愈少女/Healer Girl][08][1080p][繁日雙語][招募翻譯]",
 		"【喵萌奶茶屋】★04月新番★[夏日重现/Summer Time Rendering][07][1080p][简日双语][招募翻译]",

@@ -29,7 +29,7 @@ func NewBangumiFilter() *BangumiFilter {
 		movieRegexp:      regexp.MustCompile(`剧场版|OVA|OAD|(?i)Movie`),
 		// currently, |字幕社|工作室 are not included in teams
 		teamRegexp:       regexp.MustCompile(`喵萌|LoliHouse|字幕组`),
-		resolutionRegexp: regexp.MustCompile("[0-9]{3,}[pPiI]|[24][kK]|[0-9]{3,4}x[0-9]{3,4}"),
+		resolutionRegexp: regexp.MustCompile("[0-9]{3,}[pPiI]|[24][kK]|[0-9]{3,4}[xX][0-9]{3,4}"),
 		mediaInfoRegexp:  regexp.MustCompile("(?i)(AVC|HEVC|AAC|WebRip|TVrip|MP4|MKV|WEB-DL|BDRip|[0-9]+-?bit|Ma10|Hi10|FLAC|BDMV|M2TS|x264|x265)"),
 	}
 	return bf
@@ -135,7 +135,7 @@ func SplitByDelimiter(name, delimiter string) []string {
 			}
 		}
 	}
-	if start < len(name) {
+	if start < len(name) && !resetPos {
 		subStr := name[start:]
 		if len(subStr) != 0 {
 			split = append(split, subStr)
