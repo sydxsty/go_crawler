@@ -118,6 +118,11 @@ func main() {
 			if err != nil {
 				log.Println("failed to SetPTGENContent: ", err)
 			}
+			chsName, err := ptgen.GetCHNNameFromDetail(detail)
+			if err == nil && len(chsName) > 0 {
+				log.Println("set torrent chsName to: ", chsName)
+				ti.Detail.TorrentChsName = chsName
+			}
 			mediaInfo, err := GetMediaInfoFromWEBUI(ti.InfoHash, p.Webui)
 			if err != nil {
 				log.Println("failed to get media info: ", err)

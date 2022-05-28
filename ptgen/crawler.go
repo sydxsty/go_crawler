@@ -92,3 +92,23 @@ func GetTextFromDetail(detail map[string]interface{}) (string, error) {
 	value = strings.ReplaceAll(value, " ", "")
 	return value, nil
 }
+
+func GetCHNNameFromDetail(detail map[string]interface{}) (string, error) {
+	value, ok := detail["info"].([]interface{})
+	if !ok {
+		return "", errors.New("covert failure")
+	}
+	for _, info := range value {
+		chnName, ok := info.(string)
+		if !ok {
+			continue
+		}
+		if strings.Contains(chnName, "中文名: ") {
+			chnName = strings.ReplaceAll(chnName, "中文名: ", "")
+			if len(chnName) != 0 {
+				return chnName, nil
+			}
+		}
+	}
+	return "", errors.New("no error")
+}
