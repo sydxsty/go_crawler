@@ -165,7 +165,7 @@ func main() {
 
 func (p *Poster) GetTorrentPTGenDetail(info *dao.BangumiTorrentInfo) (map[string]interface{}, error) {
 	alias := p.ani.GetAliasCHSName(info.Title)
-	if info.MustGetCHSName() == "" {
+	if alias != "" {
 		info.SetCHSName(alias)
 	}
 	links, err := p.ptgen.GetBangumiLinkByNames(

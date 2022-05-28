@@ -2,7 +2,7 @@ package ptgen
 
 import (
 	"encoding/json"
-	"errors"
+	"github.com/pkg/errors"
 	"log"
 	"net/url"
 	"strings"
@@ -45,6 +45,7 @@ func (p *PTGenImpl) GetBangumiLinkByName(name string) ([]*BangumiLinkDetail, err
 	if name == "" {
 		return nil, errors.New("query name is empty")
 	}
+	name = strings.ReplaceAll(name, "!", "！")
 	resp, err := p.client.SyncVisit(`/?` + `search=` + url.QueryEscape(name) + `&source=bangumi`)
 	if err != nil {
 		return nil, err
@@ -55,6 +56,10 @@ func (p *PTGenImpl) GetBangumiLinkByName(name string) ([]*BangumiLinkDetail, err
 		return nil, err
 	}
 
+	errMsg, ok := result["error"].(string)
+	if !ok || len(errMsg) != 0 {
+		return nil, errors.New("remote server failure: " + errMsg)
+	}
 	data, ok := result["data"].([]interface{})
 	if !ok {
 		return nil, errors.New("can not unpack result")
