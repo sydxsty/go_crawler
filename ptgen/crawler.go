@@ -4,14 +4,19 @@ import (
 	"encoding/json"
 	"errors"
 	"log"
-	"net/url"
 	"strings"
 )
 
 type PTGen interface {
-	GetBangumiLinkByNames(jpnName string, names ...string) (map[string]string, error)
-	GetBangumiLinkByName(name string) (map[string]string, error)
+	GetBangumiLinkByNames(jpnName string, names ...string) ([]*BangumiLinkDetail, error)
+	GetBangumiLinkByName(name string) ([]*BangumiLinkDetail, error)
 	GetBangumiDetailByLink(link string) (map[string]interface{}, error)
+}
+
+type BangumiLinkDetail struct {
+	ChnName string
+	JpnName string
+	Link    string
 }
 
 type PTGenImpl struct {
@@ -24,7 +29,7 @@ func NewPTGen(client Client) PTGen {
 	}
 }
 
-func (p *PTGenImpl) GetBangumiLinkByNames(jpnName string, names ...string) (map[string]string, error) {
+func (p *PTGenImpl) GetBangumiLinkByNames(jpnName string, names ...string) ([]*BangumiLinkDetail, error) {
 	for _, name := range append([]string{jpnName}, names...) {
 		result, err := p.GetBangumiLinkByName(name)
 		if err == nil {
@@ -35,11 +40,11 @@ func (p *PTGenImpl) GetBangumiLinkByNames(jpnName string, names ...string) (map[
 	return nil, errors.New("can not get any valid result")
 }
 
-func (p *PTGenImpl) GetBangumiLinkByName(name string) (map[string]string, error) {
+func (p *PTGenImpl) GetBangumiLinkByName(name string) ([]*BangumiLinkDetail, error) {
 	if name == "" {
 		return nil, errors.New("query name is empty")
 	}
-	resp, err := p.client.SyncVisit(`/?` + `search=` + url.QueryEscape(name) + `&source=bangumi`)
+	resp, err := p.client.SyncVisit(`/?` + `search=` + name + `&source=bangumi`)
 	if err != nil {
 		return nil, err
 	}
@@ -53,18 +58,22 @@ func (p *PTGenImpl) GetBangumiLinkByName(name string) (map[string]string, error)
 	if !ok {
 		return nil, errors.New("can not unpack result")
 	}
-	linkMap := make(map[string]string)
+	links := make([]*BangumiLinkDetail, 0)
 	for _, node := range data {
 		unmarshalNode := node.(map[string]interface{})
 		if unmarshalNode["subtype"].(string) == "动画/二次元番" {
-			linkMap[unmarshalNode["title"].(string)] = unmarshalNode["link"].(string)
+			links = append(links, &BangumiLinkDetail{
+				ChnName: unmarshalNode["title"].(string),
+				JpnName: unmarshalNode["subtitle"].(string),
+				Link:    unmarshalNode["link"].(string),
+			})
 			break
 		}
 	}
-	if linkMap == nil || len(linkMap) == 0 {
+	if links == nil || len(links) == 0 {
 		return nil, errors.New("result is empty")
 	}
-	return linkMap, nil
+	return links, nil
 }
 
 func (p *PTGenImpl) GetBangumiDetailByLink(link string) (map[string]interface{}, error) {

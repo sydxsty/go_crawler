@@ -178,18 +178,27 @@ func (b *BangumiTorrentInfo) MustGetLanguage() string {
 }
 
 // SetReleaseCHSName change the chs name to release version, the chs name may not be searchable in ptgen
-func (b *BangumiTorrentInfo) SetReleaseCHSName(overrideCHSName func() (string, error)) {
-	if overrideCHSName != nil {
-		name, err := overrideCHSName()
-		if err == nil && name != "" {
-			log.Println("set torrent chsName to: ", name)
-			b.detail.TorrentChsName = name
-		}
+func (b *BangumiTorrentInfo) SetReleaseCHSName(name string) {
+	if len(name) != 0 {
+		log.Println("set torrent chsName to: ", name)
+		b.detail.TorrentChsName = name
 	}
 	target := b.bgmFilter.GetSeasonType(b.detail.TorrentChsName)
 	if len(target) == 0 { // the season is empty
 		b.detail.TorrentChsName += getString(b.bgmFilter.GetSeasonType(b.Title))
 	}
+}
+
+func (b *BangumiTorrentInfo) SetCHSName(name string) {
+	b.detail.TorrentChsName = name
+}
+
+func (b *BangumiTorrentInfo) SetENGName(name string) {
+	b.detail.TorrentEngName = name
+}
+
+func (b *BangumiTorrentInfo) SetJPNName(name string) {
+	b.detail.TorrentJpnName = name
 }
 
 func (b *BangumiTorrentInfo) GetContent() string {

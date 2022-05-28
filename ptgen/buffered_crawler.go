@@ -2,6 +2,7 @@ package ptgen
 
 import (
 	"crawler/storage"
+	"github.com/pkg/errors"
 	"log"
 )
 
@@ -17,23 +18,21 @@ func NewBufferedPTGen(client Client, db storage.KVStorage) PTGen {
 	}
 }
 
-func (b BufferedPTGenImpl) GetBangumiLinkByNames(jpnName string, names ...string) (map[string]string, error) {
-	results, err := loadPTGenResult(b.db, jpnName)
-	if err == nil {
-		return results, nil
+func (b BufferedPTGenImpl) GetBangumiLinkByNames(jpnName string, names ...string) ([]*BangumiLinkDetail, error) {
+	for _, name := range append([]string{jpnName}, names...) {
+		result, err := b.GetBangumiLinkByName(name)
+		if err == nil {
+			return result, nil
+		}
+		log.Println("this name contains no result, switch to another name, ", name, err)
 	}
-	results, err = b.pg.GetBangumiLinkByNames(jpnName, names...)
-	if err != nil {
-		return nil, err
-	}
-	err = savePTGenResult(b.db, jpnName, results)
-	if err != nil {
-		log.Println("pt-gen result save failed, ", err)
-	}
-	return results, nil
+	return nil, errors.New("can not get any valid result")
 }
 
-func (b BufferedPTGenImpl) GetBangumiLinkByName(name string) (map[string]string, error) {
+func (b BufferedPTGenImpl) GetBangumiLinkByName(name string) ([]*BangumiLinkDetail, error) {
+	if name == "" {
+		return nil, errors.New("query name is empty")
+	}
 	results, err := loadPTGenResult(b.db, name)
 	if err == nil {
 		return results, nil
@@ -68,7 +67,7 @@ func (b BufferedPTGenImpl) GetBangumiDetailByLink(link string) (map[string]inter
 	return results, nil
 }
 
-func savePTGenResult(db storage.KVStorage, chsName string, result map[string]string) error {
+func savePTGenResult(db storage.KVStorage, chsName string, result []*BangumiLinkDetail) error {
 	err := db.Put(`pt_gen_`+chsName, result)
 	if err != nil {
 		return err
@@ -76,8 +75,8 @@ func savePTGenResult(db storage.KVStorage, chsName string, result map[string]str
 	return nil
 }
 
-func loadPTGenResult(db storage.KVStorage, chsName string) (map[string]string, error) {
-	var result map[string]string
+func loadPTGenResult(db storage.KVStorage, chsName string) ([]*BangumiLinkDetail, error) {
+	var result []*BangumiLinkDetail
 	err := db.Get(`pt_gen_`+chsName, &result)
 	if err != nil {
 		return nil, err

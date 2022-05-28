@@ -166,25 +166,24 @@ func main() {
 func (p *Poster) GetTorrentPTGenDetail(info *dao.BangumiTorrentInfo) (map[string]interface{}, error) {
 	alias := p.ani.GetAliasCHSName(info.Title)
 	if info.MustGetCHSName() == "" {
-		info.SetReleaseCHSName(func() (string, error) {
-			return alias, nil
-		})
+		info.SetCHSName(alias)
 	}
 	links, err := p.ptgen.GetBangumiLinkByNames(
-		info.MustGetJPNName(),
 		info.MustGetCHSName(),
+		info.MustGetJPNName(),
 		info.MustGetENGName(),
 		alias)
 	if err != nil {
 		return nil, err
 	}
-	for k, v := range links {
-		result, err := p.ptgen.GetBangumiDetailByLink(v)
+	for _, v := range links {
+		result, err := p.ptgen.GetBangumiDetailByLink(v.Link)
 		if err == nil {
 			// update chinese name
-			info.SetReleaseCHSName(func() (string, error) {
-				return k, nil
-			})
+			info.SetReleaseCHSName(v.ChnName)
+			if info.MustGetJPNName() == "" {
+				info.SetJPNName(v.JpnName)
+			}
 			return result, nil
 		}
 	}
