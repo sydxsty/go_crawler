@@ -56,9 +56,9 @@ func (p *PTGenImpl) GetBangumiLinkByName(name string) ([]*BangumiLinkDetail, err
 		return nil, err
 	}
 
-	errMsg, ok := result["error"].(string)
-	if !ok || len(errMsg) != 0 {
-		return nil, errors.New("remote server failure: " + errMsg)
+	msg, ok := result["error"]
+	if !ok || msg != nil {
+		return nil, errors.New("remote server failure: " + msg.(string))
 	}
 	data, ok := result["data"].([]interface{})
 	if !ok {

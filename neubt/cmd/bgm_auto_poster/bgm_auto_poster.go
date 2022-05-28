@@ -171,8 +171,7 @@ func (p *Poster) GetTorrentPTGenDetail(info *dao.BangumiTorrentInfo) (map[string
 	links, err := p.ptgen.GetBangumiLinkByNames(
 		info.MustGetCHSName(),
 		info.MustGetJPNName(),
-		info.MustGetENGName(),
-		alias)
+		info.MustGetENGName())
 	if err != nil {
 		return nil, err
 	}
@@ -183,6 +182,10 @@ func (p *Poster) GetTorrentPTGenDetail(info *dao.BangumiTorrentInfo) (map[string
 			info.SetReleaseCHSName(v.ChnName)
 			if info.MustGetJPNName() == "" {
 				info.SetJPNName(v.JpnName)
+			}
+			err = p.ani.AddNewCHSName(v.ChnName, "")
+			if err != nil {
+				log.Println("can not write ani", err)
 			}
 			return result, nil
 		}
