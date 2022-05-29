@@ -1,0 +1,11 @@
+username: username
+password: password
+use_cookie: false
+cookie_path: cookie
+qb_addr: "http://your_qbittorrent_ip:8080/"
+qb_username: your_qbittorrent_username
+qb_password: your_qbittorrent_password
+torrent_path: "./data/download/"
+leveldb_path: "./data/db/"
+discount_water_mark: 50
+thread_water_mark: 1684525

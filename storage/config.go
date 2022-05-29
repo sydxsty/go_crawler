@@ -1,7 +1,8 @@
 package storage
 
 import (
-	"gopkg.in/yaml.v3"
+	"github.com/pkg/errors"
+	"gopkg.in/yaml.v2"
 	"os"
 )
 
@@ -21,12 +22,13 @@ type Config struct {
 
 func LoadConfig(path string) (*Config, error) {
 	conf := make(map[interface{}]interface{})
-	if f, err := os.Open(path); err != nil {
-		return nil, err
-	} else {
-		if err := yaml.NewDecoder(f).Decode(conf); err != nil {
-			return nil, err
-		}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, errors.Wrap(err, "config not exist")
+	}
+	err = yaml.Unmarshal(data, &conf)
+	if err != nil {
+		return nil, errors.Wrap(err, "can not load config")
 	}
 	cfg := &Config{
 		Username:          conf["username"].(string),
@@ -40,6 +42,9 @@ func LoadConfig(path string) (*Config, error) {
 		TorrentPath:       conf["torrent_path"].(string),
 		ThreadWaterMark:   conf["thread_water_mark"].(int),
 		DiscountWaterMark: conf["discount_water_mark"].(int),
+	}
+	if _, err = os.Stat(cfg.TorrentPath); os.IsNotExist(err) {
+		_ = os.Mkdir(cfg.TorrentPath, 0666)
 	}
 	return cfg, nil
 }

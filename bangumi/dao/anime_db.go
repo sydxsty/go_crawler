@@ -2,7 +2,7 @@ package dao
 
 import (
 	"github.com/pkg/errors"
-	"gopkg.in/yaml.v3"
+	"gopkg.in/yaml.v2"
 	"os"
 	"strings"
 )
@@ -18,12 +18,14 @@ type AnimeDB struct {
 
 func NewAnimeDB() (*AnimeDB, error) {
 	a := &AnimeDB{}
-	f, err := os.OpenFile("./data/names.yaml", os.O_CREATE|os.O_RDONLY, 0666)
-	defer f.Close()
+	data, err := os.ReadFile("./data/names.yaml")
+	if err != nil {
+		return a, nil
+	}
+	err = yaml.Unmarshal(data, &a.stateList)
 	if err != nil {
 		return nil, err
 	}
-	_ = yaml.NewDecoder(f).Decode(&a.stateList)
 	return a, nil
 }
 
@@ -69,12 +71,12 @@ func (a *AnimeDB) InsertNewCHSName(name, replace string) error {
 
 func (a *AnimeDB) appendCHSName(name, replace string) error {
 	a.stateList = append(a.stateList, NamePair{Name: name, Replace: replace})
-	f, err := os.OpenFile("./data/names.yaml", os.O_CREATE|os.O_WRONLY, 0666)
-	defer f.Close()
+	data, err := yaml.Marshal(a.stateList)
 	if err != nil {
 		return err
 	}
-	if err = yaml.NewEncoder(f).Encode(a.stateList); err != nil {
+	err = os.WriteFile("./data/names.yaml", data, 0666)
+	if err != nil {
 		return err
 	}
 	return nil

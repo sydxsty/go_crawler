@@ -67,7 +67,7 @@ func main() {
 				return
 			}
 			if p.Webui.Contains(ti.InfoHash) && !p.Webui.Completed(ti.InfoHash) {
-				log.Println("torrent is downloading: ", ti.Title)
+				log.Println("torrent is downloading: ", ti.InfoHash)
 				return
 			}
 			// 1. torrent not exist
@@ -79,7 +79,7 @@ func main() {
 			}
 			// for torrents not exist
 			if !p.Webui.Completed(ti.InfoHash) {
-				log.Println("prepare to download torrent from bangumi: ", ti.Title)
+				log.Println("start download torrent from bangumi")
 				if err := p.bgmTrMgr.CanDownloadFromBangumi(ti); err != nil {
 					log.Println("filter failure reason", err)
 					return
@@ -98,11 +98,11 @@ func main() {
 				if err != nil {
 					log.Println("can not download bangumi torrent", err)
 				}
-				log.Println("downloaded bangumi torrent: ", ti.Title)
+				log.Println("downloaded torrent: ", ti.MustGetCHSName())
 				return
 			}
 			// for completed torrents
-			log.Println("prepare to post torrent to neubt: ", ti.Title)
+			log.Println("prepare to post torrent: ", ti.MustGetCHSName())
 			// pause torrent to reduce network overhead
 			err = p.Webui.Pause(ti.InfoHash)
 			if err != nil {
@@ -183,7 +183,7 @@ func (p *Poster) GetTorrentPTGenDetail(info *dao.BangumiTorrentInfo) (map[string
 			if info.MustGetJPNName() == "" {
 				info.SetJPNName(v.JpnName)
 			}
-			err = p.ani.AddNewCHSName(v.ChnName, "")
+			err = p.ani.InsertNewCHSName(v.ChnName, "")
 			if err != nil {
 				log.Println("can not write ani", err)
 			}
