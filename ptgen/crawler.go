@@ -5,19 +5,27 @@ import (
 	"github.com/pkg/errors"
 	"log"
 	"net/url"
+	"regexp"
 	"strings"
 )
 
 type PTGen interface {
 	GetBangumiLinkByNames(jpnName string, names ...string) ([]*BangumiLinkDetail, error)
 	GetBangumiLinkByName(name string) ([]*BangumiLinkDetail, error)
-	GetBangumiDetailByLink(link string) (map[string]interface{}, error)
+	GetBangumiInfoByLink(link string) (map[string]interface{}, error)
 }
 
 type BangumiLinkDetail struct {
 	ChnName string
 	JpnName string
 	Link    string
+}
+
+type BangumiInfoDetail struct {
+	ChnName string
+	EngName string
+	JpnName string
+	Detail  string
 }
 
 type PTGenImpl struct {
@@ -82,7 +90,7 @@ func (p *PTGenImpl) GetBangumiLinkByName(name string) ([]*BangumiLinkDetail, err
 	return links, nil
 }
 
-func (p *PTGenImpl) GetBangumiDetailByLink(link string) (map[string]interface{}, error) {
+func (p *PTGenImpl) GetBangumiInfoByLink(link string) (map[string]interface{}, error) {
 	resp, err := p.client.SyncVisit(`/?url=` + link)
 	if err != nil {
 		return nil, err
@@ -99,11 +107,66 @@ func (p *PTGenImpl) GetBangumiDetailByLink(link string) (map[string]interface{},
 	return result, nil
 }
 
-func GetTextFromDetail(detail map[string]interface{}) (string, error) {
-	value, ok := detail["format"].(string)
-	if !ok {
-		return "", errors.New("covert failure")
+func GetDetailFromInfo(info map[string]interface{}) (*BangumiInfoDetail, error) {
+	b := &BangumiInfoDetail{}
+	b.Detail = getFormatFromInfo(info)
+	if len(b.Detail) == 0 {
+		return nil, errors.New("covert failure")
 	}
-	value = strings.ReplaceAll(value, " ", "")
-	return value, nil
+	vs, ok := info["info"].([]interface{})
+	if !ok {
+		return b, nil
+	}
+	b.EngName = getENGNameFromInfo(vs)
+	b.ChnName = getCHNNameFromInfo(vs)
+	b.JpnName = getJPNNameFromInfo(vs)
+	return b, nil
+}
+
+func getFormatFromInfo(info map[string]interface{}) string {
+	format, ok := info["format"].(string)
+	if !ok {
+		return ""
+	}
+	return strings.ReplaceAll(format, " ", "")
+}
+
+func getENGNameFromInfo(info []interface{}) string {
+	nonEngFilter := regexp.MustCompile(`[\x{4e00}-\x{9fa5}]|[\x{3040}-\x{309F}\x{30A0}-\x{30FF}\x{31F0}-\x{31FF}]`)
+	for _, v := range info {
+		str := v.(string)
+		if strings.Contains(str, "别名: ") {
+			str = strings.ReplaceAll(str, "别名: ", "")
+			if len(nonEngFilter.FindAllString(str, -1)) == 0 {
+				// non chinese or japanese
+				return str
+			}
+		}
+	}
+	return ""
+}
+
+func getJPNNameFromInfo(info []interface{}) string {
+	jpnFilter := regexp.MustCompile(`[\x{3040}-\x{309F}\x{30A0}-\x{30FF}\x{31F0}-\x{31FF}]`)
+	for _, v := range info {
+		str := v.(string)
+		if strings.Contains(str, "别名: ") {
+			str = strings.ReplaceAll(str, "别名: ", "")
+			if len(jpnFilter.FindAllString(str, -1)) != 0 {
+				// japanese
+				return str
+			}
+		}
+	}
+	return ""
+}
+
+func getCHNNameFromInfo(info []interface{}) string {
+	for _, v := range info {
+		str := v.(string)
+		if strings.Contains(str, "中文名: ") {
+			return strings.ReplaceAll(str, "中文名: ", "")
+		}
+	}
+	return ""
 }

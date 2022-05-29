@@ -77,6 +77,7 @@ func main() {
 				log.Println("no matching result in ptgen: ", err)
 				return
 			}
+			log.Printf("CHSName: %s, ENGName: %s, JPNName: %s", ti.MustGetCHSName(), ti.MustGetENGName(), ti.MustGetJPNName())
 			// for torrents not exist
 			if !p.Webui.Completed(ti.InfoHash) {
 				log.Println("start download torrent from bangumi")
@@ -119,12 +120,7 @@ func main() {
 				log.Println("failed to update bangumi torrent info: ", err)
 				return
 			}
-			text, err := ptgen.GetTextFromDetail(detail)
-			if err != nil {
-				log.Println("failed to get text from ptgen detail: ", err)
-				return
-			}
-			err = poster.SetPTGENContent(text)
+			err = poster.SetPTGENContent(detail.Detail)
 			if err != nil {
 				log.Println("failed to SetPTGENContent: ", err)
 			}
@@ -163,7 +159,8 @@ func main() {
 	}
 }
 
-func (p *Poster) GetTorrentPTGenDetail(info *dao.BangumiTorrentInfo) (map[string]interface{}, error) {
+// GetTorrentPTGenDetail the info will be updated
+func (p *Poster) GetTorrentPTGenDetail(info *dao.BangumiTorrentInfo) (*ptgen.BangumiInfoDetail, error) {
 	alias := p.ani.GetAliasCHSName(info.Title)
 	if alias != "" {
 		info.SetCHSName(alias)
@@ -175,20 +172,31 @@ func (p *Poster) GetTorrentPTGenDetail(info *dao.BangumiTorrentInfo) (map[string
 	if err != nil {
 		return nil, err
 	}
-	for _, v := range links {
-		result, err := p.ptgen.GetBangumiDetailByLink(v.Link)
-		if err == nil {
-			// update chinese name
-			info.SetReleaseCHSName(v.ChnName)
-			if info.MustGetJPNName() == "" {
-				info.SetJPNName(v.JpnName)
-			}
-			err = p.ani.InsertNewCHSName(v.ChnName, "")
-			if err != nil {
-				log.Println("can not write ani", err)
-			}
-			return result, nil
+	for _, v := range links { // we actually use links[0]
+		r, err := p.ptgen.GetBangumiInfoByLink(v.Link)
+		if err != nil {
+			return nil, err
 		}
+		err = p.ani.InsertNewCHSName(v.ChnName, "")
+		if err != nil {
+			log.Println("can not write ani", err)
+		}
+		// update names
+		info.SetReleaseCHSName(v.ChnName)
+		if info.MustGetJPNName() == "" {
+			info.SetJPNName(v.JpnName)
+		}
+		d, err := ptgen.GetDetailFromInfo(r)
+		if err != nil {
+			return nil, err
+		}
+		if info.MustGetJPNName() == "" {
+			info.SetJPNName(d.JpnName)
+		}
+		if info.MustGetENGName() == "" {
+			info.SetENGName(d.EngName)
+		}
+		return d, nil
 	}
 	return nil, errors.New("no matching result")
 }

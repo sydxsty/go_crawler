@@ -48,7 +48,7 @@ func (b BufferedPTGenImpl) GetBangumiLinkByName(name string) ([]*BangumiLinkDeta
 	return results, nil
 }
 
-func (b BufferedPTGenImpl) GetBangumiDetailByLink(link string) (map[string]interface{}, error) {
+func (b BufferedPTGenImpl) GetBangumiInfoByLink(link string) (map[string]interface{}, error) {
 	results, err := loadPTGenLink(b.db, link)
 	if err == nil {
 		success, ok := results["success"].(bool)
@@ -56,7 +56,7 @@ func (b BufferedPTGenImpl) GetBangumiDetailByLink(link string) (map[string]inter
 			return results, nil
 		}
 	}
-	results, err = b.pg.GetBangumiDetailByLink(link)
+	results, err = b.pg.GetBangumiInfoByLink(link)
 	if err != nil {
 		return nil, err
 	}

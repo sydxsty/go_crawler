@@ -12,9 +12,9 @@ func TestGetBangumiLinkByNames(t *testing.T) {
 	links, err := crawler.GetBangumiLinkByNames("であいもん", "相合之物", "Deaimon")
 	assert.NoError(t, err, "error when getting info")
 	for _, v := range links {
-		result, err := crawler.GetBangumiDetailByLink(v)
+		result, err := crawler.GetBangumiInfoByLink(v.Link)
 		assert.NoError(t, err, "error when getting link")
-		log.Println(GetTextFromDetail(result))
+		log.Println(GetDetailFromInfo(result))
 	}
 }
 

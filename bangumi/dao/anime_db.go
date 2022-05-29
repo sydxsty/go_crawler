@@ -63,7 +63,7 @@ func (a *AnimeDB) AddNewCHSName(name, replace string) error {
 func (a *AnimeDB) InsertNewCHSName(name, replace string) error {
 	for _, v := range a.stateList {
 		if name == v.Name {
-			return errors.New("value already exist")
+			return errors.Errorf("key already exist: %s", name)
 		}
 	}
 	return a.appendCHSName(name, replace)

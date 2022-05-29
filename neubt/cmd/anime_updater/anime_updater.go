@@ -35,15 +35,15 @@ func main() {
 	if err != nil {
 		log.Fatal("can not init modifier")
 	}
-	detail, err := u.ptgen.GetBangumiDetailByLink(bgmURL)
+	info, err := u.ptgen.GetBangumiInfoByLink(bgmURL)
 	if err != nil {
 		log.Fatal("can not get bgm detail")
 	}
-	text, err := ptgen.GetTextFromDetail(detail)
+	detail, err := ptgen.GetDetailFromInfo(info)
 	if err != nil {
 		log.Fatal("failed to get text from ptgen detail: ", err)
 	}
-	err = poster.SetPTGENContent(text)
+	err = poster.SetPTGENContent(detail.Detail)
 	if err != nil {
 		log.Fatal("failed to SetPTGENContent: ", err)
 	}
