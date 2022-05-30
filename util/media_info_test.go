@@ -13,7 +13,7 @@ func TestGetMediaInfo(t *testing.T) {
 }
 
 func TestGetMediaImage(t *testing.T) {
-	bytes, err := GetMediaImage("./lib", "./lib", "example.mp4")
+	bytes, err := GetMediaImage("./lib", "D:\\迅雷下载", "[Comicat&KissSub][SPY×FAMILY][07][1080P][GB][MP4].mp4")
 	assert.NoError(t, err, "test failure")
 	log.Print(len(bytes))
 }

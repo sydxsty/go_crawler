@@ -32,7 +32,7 @@ func GetMediaInfo(execFileDir, mediaPath, mediaName string) (string, error) {
 }
 
 func GetMediaImage(execFileDir, mediaPath, mediaName string) ([]byte, error) {
-	// please unzip mtn-linux.rar to ./lib
+	// please unzip mtn-linux.rar to ./lib, may need ffmpeg
 	execFileDir, _ = filepath.Abs(execFileDir)
 	mediaPath, _ = filepath.Abs(mediaPath)
 	pathReg := regexp.MustCompile(`output: +(.+\.jpg)`)
@@ -44,7 +44,7 @@ func GetMediaImage(execFileDir, mediaPath, mediaName string) ([]byte, error) {
 		}
 		return nil
 	}
-	err := ExecCmd(execFileDir, filepath.Join(execFileDir, `mtn`), []string{"-P", "-O", execFileDir, filepath.Join(mediaPath, mediaName)}, callback)
+	err := ExecCmd(execFileDir, filepath.Join(execFileDir, `mtn`), []string{"-c", "4", "-r", "3", "-P", "-O", execFileDir, filepath.Join(mediaPath, mediaName)}, callback)
 	if err != nil {
 		return nil, errors.Wrap(err, "generate media info failed")
 	}

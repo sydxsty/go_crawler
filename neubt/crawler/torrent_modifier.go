@@ -79,7 +79,7 @@ func (t *TorrentModifier) UpdateTorrentMultiPart() error {
 	_ = w.WriteField(UTF82GB2312("allownoticeauthor"), UTF82GB2312("1"))
 	_ = w.WriteField(UTF82GB2312("usesig"), UTF82GB2312("1"))
 	_ = w.WriteField(UTF82GB2312("save"), UTF82GB2312(""))
-	for _, aid := range t.aidList {
+	for _, aid := range append(t.aidList, t.thumbAidList...) {
 		_ = w.WriteField(UTF82GB2312("attachupdate["+aid+"]"), UTF82GB2312(""))
 		_ = w.WriteField(UTF82GB2312("attachnew["+aid+"][description]"), UTF82GB2312(""))
 		_ = w.WriteField(UTF82GB2312("attachnew["+aid+"][readperm]"), UTF82GB2312(""))

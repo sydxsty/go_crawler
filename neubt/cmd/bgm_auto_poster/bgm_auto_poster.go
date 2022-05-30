@@ -124,12 +124,16 @@ func main() {
 			if err != nil {
 				log.Println("failed to SetPTGENContent: ", err)
 			}
-			mediaInfo, err := GetMediaInfoFromWEBUI(ti.InfoHash, p.Webui)
+			mediaInfo, thumb, err := GetMediaInfoFromWEBUI(ti.InfoHash, p.Webui)
 			if err != nil {
 				log.Println("failed to get media info: ", err)
 				return
 			}
 			poster.SetMediaInfoContent(mediaInfo)
+			err = poster.SetTorrentThumb(thumb, "jpg")
+			if err != nil {
+				log.Println("failed to create neubt media thumb, proceed: ", err)
+			}
 			data, err := crawler.LoadTorrentFromFile(p.Config.TorrentPath, ti.InfoHash)
 			if err != nil {
 				log.Println("failed to load torrent from disk: ", err)
@@ -260,12 +264,13 @@ func UpdateWithTorrentInfo(poster neubtCrawler.TorrentPoster, info *dao.BangumiT
 	return nil
 }
 
-func GetMediaInfoFromWEBUI(infoHash string, webui qbt.WEBUIHelper) (string, error) {
+// GetMediaInfoFromWEBUI return the mediaInfo, thumb, and error
+func GetMediaInfoFromWEBUI(infoHash string, webui qbt.WEBUIHelper) (string, []byte, error) {
 	// generate media info
 	log.Println("generating media info")
 	torrent, files, err := webui.GetTorrentDetail(infoHash)
 	if err != nil {
-		return "", errors.Wrap(err, "failed to get torrent files")
+		return "", nil, errors.Wrap(err, "failed to get torrent files")
 	}
 	savePath := torrent.SavePath
 	var fileName string
@@ -277,13 +282,19 @@ func GetMediaInfoFromWEBUI(infoHash string, webui qbt.WEBUIHelper) (string, erro
 		log.Println(file.Name, "is not a video file")
 	}
 	if len(fileName) == 0 {
-		return "", errors.New("can not find valid video file in torrent")
+		return "", nil, errors.New("can not find valid video file in torrent")
 	}
 	info, err := util.GetMediaInfo("./lib", savePath, fileName)
 	if err != nil {
-		return "", errors.Wrap(err, "failed to generate media info of file"+fileName)
+		return "", nil, errors.Wrap(err, "failed to generate media info of file"+fileName)
 	}
-	return info, nil
+	log.Println("generating media thumb")
+	data, err := util.GetMediaImage("./lib", savePath, fileName)
+	if err != nil {
+		log.Println("WARNING: can not get thumb, ", err)
+		return info, nil, nil
+	}
+	return info, data, nil
 }
 
 func IsVideoFile(name string) bool {

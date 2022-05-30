@@ -14,7 +14,7 @@ import (
 // ImageUploader upload the image to the specific thread
 type ImageUploader interface {
 	// UploadImage upload the image, return the image AID
-	UploadImage(data []byte, fileType string) (string, error)
+	UploadImage(data []byte, filename, fileType string) (string, error)
 	RemoveImage(aid string) error
 }
 
@@ -37,14 +37,14 @@ func NewImageUploader(client neubt.Client, uid, hash string) ImageUploader {
 	return i
 }
 
-func (i *ImageUploaderImpl) UploadImage(data []byte, fileType string) (string, error) {
+func (i *ImageUploaderImpl) UploadImage(data []byte, filename, fileType string) (string, error) {
 	body := new(bytes.Buffer)
 	w := multipart.NewWriter(body)
 
 	_ = w.WriteField(UTF82GB2312("uid"), UTF82GB2312(i.uid))
 	_ = w.WriteField(UTF82GB2312("hash"), UTF82GB2312(i.hash))
 
-	pa, _ := w.CreateFormFile(UTF82GB2312("Filedata"), UTF82GB2312("poster."+fileType))
+	pa, _ := w.CreateFormFile(UTF82GB2312("Filedata"), UTF82GB2312(filename+"."+fileType))
 	if _, err := pa.Write(data); err != nil {
 		return "", err
 	}
@@ -85,7 +85,11 @@ func ReplaceImgWithTagID(text string, aid []string) (string, error) {
 		return "", errors.New("the size of image and aid not equal")
 	}
 	for i, r := range target {
-		text = strings.Replace(text, r, "[attachimg]"+aid[i]+"[/attachimg]", 1)
+		text = strings.Replace(text, r, GetAIDText(aid[i]), 1)
 	}
 	return text, nil
+}
+
+func GetAIDText(text string) string {
+	return "[attachimg]" + text + "[/attachimg]"
 }

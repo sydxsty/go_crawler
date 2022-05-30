@@ -12,7 +12,7 @@ func TestUploadImage(t *testing.T) {
 	iu := NewImageUploader(client, os.Getenv("uid"), os.Getenv("hash"))
 	file, err := ioutil.ReadFile(os.Getenv("fileName"))
 	assert.NoError(t, err, "error load image")
-	aid, err := iu.UploadImage(file, "jpg")
+	aid, err := iu.UploadImage(file, "poster", "jpg")
 	assert.NoError(t, err, "error upload image")
 	err = iu.RemoveImage(aid)
 	assert.NoError(t, err, "error remove image")

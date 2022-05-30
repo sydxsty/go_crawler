@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestUploadImage(t *testing.T) {
+func TestDownloadImage(t *testing.T) {
 	id, err := NewImageDownloader("https://lain.bgm.tv/pic/cover/l/de/4a/329906_hmtVD.jpg")
 	assert.NoError(t, err, "error init ImageDownloader")
 	data, fileType, err := id.Download()

@@ -27,6 +27,8 @@ type TorrentPoster interface {
 	SetPostFileName(name string)
 	// SetPTGENContent set content
 	SetPTGENContent(text string) error
+	// SetTorrentThumb add a thumb for torrent
+	SetTorrentThumb(image []byte, suffix string) error
 	SetMediaInfoContent(text string)
 	SetCommentContent(texts ...string)
 }
@@ -34,8 +36,9 @@ type TorrentPoster interface {
 type TorrentPosterImpl struct {
 	client neubt.Client
 
-	tidList map[string]string
-	aidList []string
+	tidList      map[string]string
+	aidList      []string
+	thumbAidList []string
 
 	formHash     string
 	postTime     string
@@ -45,11 +48,12 @@ type TorrentPosterImpl struct {
 	subject      string // title of the torrent
 	tid          string // type id
 
-	fieldID       string // field id, set in NewTorrentPoster
-	genTxt        string // main message, from pt-gen
-	mediaInfoText string // media info
-	comment       string // header message, torrent detail
-	postFileName  string // the torrent name showed in thread
+	fieldID        string // field id, set in NewTorrentPoster
+	genTxt         string // main message, from pt-gen
+	mediaInfoText  string // media info
+	thumbImageText string // aids for movie thumbs
+	comment        string // header message, torrent detail
+	postFileName   string // the torrent name showed in thread
 
 	imgUploader ImageUploader
 }
@@ -95,7 +99,7 @@ func (t *TorrentPosterImpl) SetPTGENContent(text string) error {
 		if err != nil {
 			return errors.Wrap(err, "can not init download image")
 		}
-		aid, err := t.imgUploader.UploadImage(data, fileType)
+		aid, err := t.imgUploader.UploadImage(data, "poster", fileType)
 		if err != nil {
 			return errors.Wrap(err, "can not upload poster to neubt")
 		}
@@ -111,6 +115,18 @@ func (t *TorrentPosterImpl) SetPTGENContent(text string) error {
 		return errors.Wrap(err, "can not replace the original txt")
 	}
 	t.genTxt = replaced
+	return nil
+}
+
+func (t *TorrentPosterImpl) SetTorrentThumb(image []byte, suffix string) error {
+	aid, err := t.imgUploader.UploadImage(image, "thumb", suffix)
+	if err != nil {
+		return errors.Wrap(err, "can not upload TorrentThumb to neubt")
+	}
+	t.thumbAidList = append(t.thumbAidList, aid)
+	log.Println("uploaded TorrentThumb to neubt")
+	time.Sleep(time.Second * 5)
+	t.thumbImageText += GetAIDText(aid) + "\n"
 	return nil
 }
 
@@ -195,7 +211,7 @@ func (t *TorrentPosterImpl) PostTorrentMultiPart(data []byte) (string, error) {
 	_ = w.WriteField(UTF82GB2312("allownoticeauthor"), UTF82GB2312("1"))
 	_ = w.WriteField(UTF82GB2312("usesig"), UTF82GB2312("1"))
 	_ = w.WriteField(UTF82GB2312("save"), UTF82GB2312(""))
-	for _, aid := range t.aidList {
+	for _, aid := range append(t.aidList, t.thumbAidList...) {
 		_ = w.WriteField(UTF82GB2312("attachupdate["+aid+"]"), UTF82GB2312(""))
 		_ = w.WriteField(UTF82GB2312("attachnew["+aid+"][description]"), UTF82GB2312(""))
 		_ = w.WriteField(UTF82GB2312("attachnew["+aid+"][readperm]"), UTF82GB2312(""))

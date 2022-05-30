@@ -28,7 +28,7 @@ func NewBangumiFilter() *BangumiFilter {
 		seasonRegexp:     regexp.MustCompile(`([sS](0|)[0-9]+)|第.季|第.期`),
 		movieRegexp:      regexp.MustCompile(`剧场版|OVA|OAD|(?i)Movie`),
 		// currently, |字幕社|工作室 are not included in teams
-		teamRegexp:       regexp.MustCompile(`喵萌|LoliHouse|字幕组`),
+		teamRegexp:       regexp.MustCompile(`喵萌|LoliHouse|字幕组|悠哈璃羽字幕社`),
 		resolutionRegexp: regexp.MustCompile("[0-9]{3,}[pPiI]|[24][kK]|[0-9]{3,4}[xX][0-9]{3,4}"),
 		mediaInfoRegexp:  regexp.MustCompile("(?i)(AVC|HEVC|AAC|WebRip|TVrip|MP4|MKV|WEB-DL|BDRip|[0-9]+-?bit|Ma10|Hi10|FLAC|BDMV|M2TS|x264|x265)"),
 	}
