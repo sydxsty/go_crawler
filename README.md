@@ -28,6 +28,18 @@ thread_water_mark: 1695272    #第一次启动时候从哪个ID开始爬
 # 自动发种
 编译入口地址
 neubt/cmd/bgm_auto_poster/bgm_auto_poster.go
+## 安装依赖
+### linux: 
+1. 安装mediainfo
+```shell
+sudo apt install mediainfo -y
+```
+2. 解压lab目录下的mtn.rar到运行./lib/目录下
+3. 填写./data/下的配置文件
+### windows:
+1. 将mediainfo放在运行./lib/目录下
+2. 解压lab目录下的mtn.rar到运行./lib/目录下
+3. 填写./data/下的配置文件
 ## 工作流程
 1. 爬取bangumi上更新的种子
 2. 查询ptgen上是否有对应动漫信息
