@@ -62,8 +62,8 @@ func (t *TorrentManager) SetTorrentPostedState(animeInfoHash string) bool {
 
 // CanDownloadFromBangumi this is a filter to avoid download same kind of torrents from site
 func (t *TorrentManager) CanDownloadFromBangumi(info *BangumiTorrentInfo) error {
-	teamName := info.MustGetTeamName()
-	if teamName == "" {
+	teams := info.MustGetTeam()
+	if teams == nil {
 		return errors.New("no team name found in info")
 	}
 	name := info.MustGetCHSName()
@@ -86,11 +86,12 @@ func (t *TorrentManager) CanDownloadFromBangumi(info *BangumiTorrentInfo) error 
 			detail = tmp
 		}
 	}
-
-	if _, ok := detail[teamName]; ok {
-		return errors.New("we have already downloaded the same torrent")
+	for _, teamName := range teams {
+		if _, ok := detail[teamName]; ok {
+			return errors.New("we have already downloaded the same torrent")
+		}
+		detail[teamName] = true
 	}
-	detail[teamName] = true
 	err = t.setState(name, episode, detail)
 	if err != nil {
 		return err

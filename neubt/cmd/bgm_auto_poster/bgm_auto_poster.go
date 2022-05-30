@@ -183,17 +183,17 @@ func (p *Poster) GetTorrentPTGenDetail(info *dao.BangumiTorrentInfo) (*ptgen.Ban
 		}
 		// update names
 		info.SetReleaseCHSName(v.ChnName)
-		if info.MustGetJPNName() == "" {
+		if info.MustGetJPNName() == "" || alias != "" {
 			info.SetJPNName(v.JpnName)
 		}
 		d, err := ptgen.GetDetailFromInfo(r)
 		if err != nil {
 			return nil, err
 		}
-		if info.MustGetJPNName() == "" {
+		if info.MustGetJPNName() == "" || alias != "" {
 			info.SetJPNName(d.JpnName)
 		}
-		if info.MustGetENGName() == "" {
+		if info.MustGetENGName() == "" || alias != "" {
 			info.SetENGName(d.EngName)
 		}
 		return d, nil
@@ -236,7 +236,7 @@ func UpdateWithTorrentInfo(poster neubtCrawler.TorrentPoster, info *dao.BangumiT
 	if info.MustGetCHSName() == "" {
 		return errors.New("no Chinese name or English name found in info")
 	}
-	if info.MustGetTeamName() == "" {
+	if info.MustGetTeam() == nil {
 		return errors.New("no team name found in info")
 	}
 	poster.SetTitle(
@@ -245,7 +245,7 @@ func UpdateWithTorrentInfo(poster neubtCrawler.TorrentPoster, info *dao.BangumiT
 		info.MustGetJPNName(),
 		info.MustGetEpisode(),
 		info.MustGetFormat(),
-		info.MustGetTeamName(),
+		info.MustGetTeamStr(),
 		info.MustGetLanguage(),
 		info.MustGetResolution(),
 	)
