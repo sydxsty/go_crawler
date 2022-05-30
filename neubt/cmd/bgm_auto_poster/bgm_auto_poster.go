@@ -187,17 +187,17 @@ func (p *Poster) GetTorrentPTGenDetail(info *dao.BangumiTorrentInfo) (*ptgen.Ban
 		}
 		// update names
 		info.SetReleaseCHSName(v.ChnName)
-		if info.MustGetJPNName() == "" || alias != "" {
+		if v.JpnName != "" && (info.MustGetJPNName() == "" || alias != "") {
 			info.SetJPNName(v.JpnName)
 		}
 		d, err := ptgen.GetDetailFromInfo(r)
 		if err != nil {
 			return nil, err
 		}
-		if info.MustGetJPNName() == "" || alias != "" {
+		if d.JpnName != "" && (info.MustGetJPNName() == "" || alias != "") {
 			info.SetJPNName(d.JpnName)
 		}
-		if info.MustGetENGName() == "" || alias != "" {
+		if d.EngName != "" && (info.MustGetENGName() == "" || alias != "") {
 			info.SetENGName(d.EngName)
 		}
 		return d, nil
