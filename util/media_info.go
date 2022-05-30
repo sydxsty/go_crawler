@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 )
 
@@ -22,12 +23,41 @@ func GetMediaInfo(execFileDir, mediaPath, mediaName string) (string, error) {
 		result += strings.ReplaceAll(str, mediaPath, "{Hidden absolute path}")
 		return nil
 	}
-	err := ExecCmd(`./`, filepath.Join(execFileDir, `mediainfo`), []string{filepath.Join(mediaPath, mediaName)}, callback)
+	err := ExecCmd(execFileDir, filepath.Join(execFileDir, `mediainfo`), []string{filepath.Join(mediaPath, mediaName)}, callback)
 	if err != nil {
 		return "", errors.Wrap(err, "generate media info failed")
 	}
 
 	return result, nil
+}
+
+func GetMediaImage(execFileDir, mediaPath, mediaName string) ([]byte, error) {
+	// please unzip mtn-linux.rar to ./lib
+	execFileDir, _ = filepath.Abs(execFileDir)
+	mediaPath, _ = filepath.Abs(mediaPath)
+	pathReg := regexp.MustCompile(`output: +(.+\.jpg)`)
+	var jpgFile string
+	callback := func(str string) error {
+		v := pathReg.FindStringSubmatch(str)
+		if v != nil {
+			jpgFile = filepath.Clean(v[1])
+		}
+		return nil
+	}
+	err := ExecCmd(execFileDir, filepath.Join(execFileDir, `mtn`), []string{"-P", "-O", execFileDir, filepath.Join(mediaPath, mediaName)}, callback)
+	if err != nil {
+		return nil, errors.Wrap(err, "generate media info failed")
+	}
+	log.Println("media image is saved to", jpgFile)
+	data, err := os.ReadFile(jpgFile)
+	if err != nil {
+		return nil, errors.Wrap(err, "can not read file: "+jpgFile)
+	}
+	err = os.Remove(jpgFile)
+	if err != nil {
+		log.Println("file remove failed, ", jpgFile, err)
+	}
+	return data, nil
 }
 
 func ExecCmd(dir, cmdStr string, params []string, callback func(string) error) error {
@@ -37,7 +67,10 @@ func ExecCmd(dir, cmdStr string, params []string, callback func(string) error) e
 	if err != nil {
 		return errors.Wrap(err, "cmd.StdoutPipe err")
 	}
-	cmd.Stderr = os.Stderr
+	stderr, err := cmd.StderrPipe()
+	if err != nil {
+		return errors.Wrap(err, "cmd.StderrPipe err")
+	}
 	cmd.Dir = dir
 	err = cmd.Start()
 	if err != nil {
@@ -52,11 +85,19 @@ func ExecCmd(dir, cmdStr string, params []string, callback func(string) error) e
 			}
 		}()
 	}()
-	reader := bufio.NewReader(stdout)
+	err = readFrom(stdout, callback)
+	if err != nil {
+		return err
+	}
+	return readFrom(stderr, callback)
+}
+
+func readFrom(out io.ReadCloser, callback func(string) error) error {
+	reader := bufio.NewReader(out)
 	for {
 		line, err := reader.ReadString('\n')
 		if err == io.EOF {
-			return nil
+			break
 		}
 		if err != nil {
 			return err
@@ -66,4 +107,5 @@ func ExecCmd(dir, cmdStr string, params []string, callback func(string) error) e
 			return err
 		}
 	}
+	return nil
 }
