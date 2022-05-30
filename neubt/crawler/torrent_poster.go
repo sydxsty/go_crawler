@@ -191,7 +191,7 @@ func (t *TorrentPosterImpl) SetTitle(pieces ...string) {
 
 func (t *TorrentPosterImpl) getMessageBody() string {
 	note := `[quote]自动发种试运行，有问题请在github上提Issue` + "\n" + `[url=https://github.com/sydxsty/go_crawler/releases]https://github.com/sydxsty/go_crawler/releases[/url][/quote]`
-	return note + t.comment + "\n" + t.genTxt + "\n" + t.mediaInfoText + "\n"
+	return note + t.comment + "\n" + t.genTxt + "\n" + t.mediaInfoText + "\n" + t.thumbImageText + "\n"
 }
 
 func (t *TorrentPosterImpl) PostTorrentMultiPart(data []byte) (string, error) {
