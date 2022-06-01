@@ -194,8 +194,8 @@ func (b *BangumiTorrentInfo) SetReleaseCHSName(name string) {
 		b.detail.ChsName = name
 	}
 	target := b.bgmFilter.GetSeasonType(b.detail.ChsName)
-	if len(target) == 0 { // the season is empty
-		b.detail.ChsName += " " + getString(b.bgmFilter.GetSeasonType(b.Title))
+	if season := getString(b.bgmFilter.GetSeasonType(b.Title)); len(target) == 0 && len(season) != 0 {
+		b.detail.ChsName += " " + season
 	}
 }
 
