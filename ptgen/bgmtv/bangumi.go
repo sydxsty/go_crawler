@@ -9,13 +9,9 @@ import (
 	"strings"
 )
 
-func SearchBangumi(query string) ([]interface{}, error) {
+func SearchBangumi(client Client, name string) ([]interface{}, error) {
 	tpDict := map[int]string{1: "漫画/小说", 2: "动画/二次元番", 3: "音乐", 4: "游戏", 6: "三次元番"}
-	client, err := NewAPIClient()
-	if err != nil {
-		return nil, err
-	}
-	r, err := getJsonSearchResp(client, `search/subject/`+url.QueryEscape(query)+`?responseGroup=large`, 3)
+	r, err := getJsonSearchResp(client, `search/subject/`+url.QueryEscape(name)+`?responseGroup=large`, 3)
 	if err != nil {
 		return nil, errors.Wrap(err, "can not get response")
 	}
@@ -57,7 +53,7 @@ func getJsonSearchResp(client Client, link string, retry uint) (map[string]inter
 	return nil, errors.Errorf("can not get valid resp within %d times.", retry)
 }
 
-func GenBangumi(client Client, link string) (interface{}, error) {
+func GenBangumi(client Client, link string) (map[string]interface{}, error) {
 	resp, err := client.SyncVisit(link)
 	if err != nil {
 		return nil, errors.Wrap(err, "can not load page")

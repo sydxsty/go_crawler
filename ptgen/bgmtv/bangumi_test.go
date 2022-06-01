@@ -7,7 +7,9 @@ import (
 )
 
 func TestSearchBangumi(t *testing.T) {
-	result, err := SearchBangumi("BIRDIE WING -Golf Girls’ Story")
+	client, err := NewAPIClient()
+	assert.NoError(t, err, "init failure")
+	result, err := SearchBangumi(client, "BIRDIE WING -Golf Girls’ Story")
 	assert.NoError(t, err, "search failure")
 	log.Println(result)
 }

@@ -9,21 +9,19 @@ import (
 
 type Updater struct {
 	*neubt.NeuBT
-	ptgenClient ptgen.Client
-	ptgen       ptgen.PTGen
+	ptgen ptgen.PTGen
 }
 
 func NewUpdater() *Updater {
-	ptgenClient, err := ptgen.NewClient()
+	nb := neubt.NewNeuBT()
+	pg, err := ptgen.NewBufferedPTGen(nb.KVS)
 	if err != nil {
 		log.Println("init ptgen client failed")
 		return nil
 	}
-	nb := neubt.NewNeuBT()
 	return &Updater{
-		NeuBT:       nb,
-		ptgenClient: ptgenClient,
-		ptgen:       ptgen.NewBufferedPTGen(ptgenClient, nb.KVS),
+		NeuBT: nb,
+		ptgen: pg,
 	}
 }
 

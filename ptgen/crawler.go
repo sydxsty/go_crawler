@@ -1,6 +1,7 @@
 package ptgen
 
 import (
+	"crawler/ptgen/bgmtv"
 	"encoding/json"
 	"github.com/pkg/errors"
 	"log"
@@ -29,13 +30,29 @@ type BangumiInfoDetail struct {
 }
 
 type PTGenImpl struct {
-	client Client
+	client    Client
+	tvClient  bgmtv.Client
+	apiClient bgmtv.Client
 }
 
-func NewPTGen(client Client) PTGen {
-	return &PTGenImpl{
-		client: client.Clone(),
+func NewPTGen() (PTGen, error) {
+	apiClient, err := bgmtv.NewAPIClient()
+	if err != nil {
+		return nil, err
 	}
+	tvClient, err := bgmtv.NewClient()
+	if err != nil {
+		return nil, err
+	}
+	client, err := NewClient()
+	if err != nil {
+		return nil, err
+	}
+	return &PTGenImpl{
+		client:    client,
+		tvClient:  tvClient,
+		apiClient: apiClient,
+	}, nil
 }
 
 func (p *PTGenImpl) GetBangumiLinkByNames(jpnName string, names ...string) ([]*BangumiLinkDetail, error) {
@@ -49,12 +66,7 @@ func (p *PTGenImpl) GetBangumiLinkByNames(jpnName string, names ...string) ([]*B
 	return nil, errors.New("can not get any valid result")
 }
 
-func (p *PTGenImpl) GetBangumiLinkByName(name string) ([]*BangumiLinkDetail, error) {
-	if name == "" {
-		return nil, errors.New("query name is empty")
-	}
-	name = strings.ReplaceAll(name, "!", "！")
-	name = strings.ReplaceAll(name, "'", "’")
+func (p *PTGenImpl) searchBangumi(name string) ([]interface{}, error) {
 	resp, err := p.client.SyncVisit(`/?` + `search=` + url.QueryEscape(name) + `&source=bangumi`)
 	if err != nil {
 		return nil, err
@@ -64,7 +76,6 @@ func (p *PTGenImpl) GetBangumiLinkByName(name string) ([]*BangumiLinkDetail, err
 	if err != nil {
 		return nil, err
 	}
-
 	msg, ok := result["error"]
 	if !ok || msg != nil {
 		return nil, errors.New("remote server failure: " + msg.(string))
@@ -72,6 +83,24 @@ func (p *PTGenImpl) GetBangumiLinkByName(name string) ([]*BangumiLinkDetail, err
 	data, ok := result["data"].([]interface{})
 	if !ok {
 		return nil, errors.New("can not unpack result")
+	}
+	return data, nil
+}
+
+func (p *PTGenImpl) GetBangumiLinkByName(name string) ([]*BangumiLinkDetail, error) {
+	if name == "" {
+		return nil, errors.New("query name is empty")
+	}
+	name = strings.ReplaceAll(name, "!", "！")
+	name = strings.ReplaceAll(name, "'", "’")
+	log.Println("using local bgmtv client, ", name)
+	data, err := bgmtv.SearchBangumi(p.apiClient, name) // local first
+	if err != nil {
+		log.Println("switch to cf worker client, ", name)
+		data, err = p.searchBangumi(name)
+		if err != nil {
+			return nil, errors.New("can not GetBangumiLinkByName from local or cf")
+		}
 	}
 	links := make([]*BangumiLinkDetail, 0)
 	for _, node := range data {
@@ -91,8 +120,8 @@ func (p *PTGenImpl) GetBangumiLinkByName(name string) ([]*BangumiLinkDetail, err
 	return links, nil
 }
 
-func (p *PTGenImpl) GetBangumiInfoByLink(link string) (map[string]interface{}, error) {
-	resp, err := p.client.SyncVisit(`/?url=` + link)
+func genBangumi(client Client, link string) (map[string]interface{}, error) {
+	resp, err := client.SyncVisit(`/?url=` + link)
 	if err != nil {
 		return nil, err
 	}
@@ -100,6 +129,19 @@ func (p *PTGenImpl) GetBangumiInfoByLink(link string) (map[string]interface{}, e
 	err = json.Unmarshal(resp.Body, &result)
 	if err != nil {
 		return nil, err
+	}
+	return result, nil
+}
+
+func (p *PTGenImpl) GetBangumiInfoByLink(link string) (map[string]interface{}, error) {
+	log.Println("using local bgmtv client, ", link)
+	result, err := bgmtv.GenBangumi(p.apiClient, link) // TODO: use tv client
+	if err != nil {
+		log.Println("switch to cf worker client, ", link)
+		result, err = genBangumi(p.client, link)
+		if err != nil {
+			return nil, errors.New("can not GetBangumiInfoByLink from local or cf")
+		}
 	}
 	success, ok := result["success"].(bool)
 	if !ok || !success {

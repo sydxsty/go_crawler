@@ -22,7 +22,6 @@ type Poster struct {
 	bgm           crawler.Bangumi
 	bgmDownloader crawler.Downloader
 	bgmTrMgr      *dao.TorrentManager
-	ptgenClient   ptgen.Client
 	ptgen         ptgen.PTGen
 	ani           *dao.AnimeDB
 }
@@ -33,12 +32,12 @@ func NewPoster() *Poster {
 		log.Println("init bangumi client failed")
 		return nil
 	}
-	ptgenClient, err := ptgen.NewClient()
+	nb := neubt.NewNeuBT()
+	pg, err := ptgen.NewBufferedPTGen(nb.KVS)
 	if err != nil {
 		log.Println("init ptgen client failed")
 		return nil
 	}
-	nb := neubt.NewNeuBT()
 	ani, err := dao.NewAnimeDB()
 	if err != nil {
 		log.Println("init ani db failed")
@@ -50,8 +49,7 @@ func NewPoster() *Poster {
 		bgm:           crawler.NewBangumi(bgmClient, nb.KVS),
 		bgmDownloader: crawler.NewDownloader(bgmClient),
 		bgmTrMgr:      dao.NewTorrentManager(nb.KVS),
-		ptgenClient:   ptgenClient,
-		ptgen:         ptgen.NewBufferedPTGen(ptgenClient, nb.KVS),
+		ptgen:         pg,
 		ani:           ani,
 	}
 }

@@ -11,11 +11,15 @@ type BufferedPTGenImpl struct {
 	db storage.KVStorage
 }
 
-func NewBufferedPTGen(client Client, db storage.KVStorage) PTGen {
-	return &BufferedPTGenImpl{
-		pg: NewPTGen(client),
-		db: db,
+func NewBufferedPTGen(db storage.KVStorage) (PTGen, error) {
+	pg, err := NewPTGen()
+	if err != nil {
+		return nil, err
 	}
+	return &BufferedPTGenImpl{
+		pg: pg,
+		db: db,
+	}, nil
 }
 
 func (b BufferedPTGenImpl) GetBangumiLinkByNames(jpnName string, names ...string) ([]*BangumiLinkDetail, error) {

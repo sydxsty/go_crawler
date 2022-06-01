@@ -8,7 +8,8 @@ import (
 )
 
 func TestGetBangumiLinkByNames(t *testing.T) {
-	crawler := NewBufferedPTGen(client, kvStorage)
+	crawler, err := NewBufferedPTGen(kvStorage)
+	assert.NoError(t, err, "init failure")
 	links, err := crawler.GetBangumiLinkByNames("であいもん", "相合之物", "Deaimon")
 	assert.NoError(t, err, "error when getting info")
 	for _, v := range links {
@@ -18,7 +19,6 @@ func TestGetBangumiLinkByNames(t *testing.T) {
 	}
 }
 
-var client Client
 var kvStorage storage.KVStorage
 
 func init() {
@@ -29,9 +29,5 @@ func init() {
 	kvStorage, err = storage.NewKVStorage(cfg.LevelDBPath)
 	if err != nil {
 		log.Fatal(err, "error load db.")
-	}
-	client, err = NewClient()
-	if err != nil {
-		log.Fatal(err, "can not init client before startup")
 	}
 }

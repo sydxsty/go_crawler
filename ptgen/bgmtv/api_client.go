@@ -4,7 +4,6 @@ import (
 	"crawler/util"
 	"github.com/gocolly/colly/v2"
 	"github.com/pkg/errors"
-	"log"
 	"time"
 )
 
@@ -37,7 +36,6 @@ func (c *APIClientImpl) SyncVisit(link string) (*colly.Response, error) {
 		return nil, errors.Wrapf(err, "can not get link for %d times", c.retry)
 	}
 	time.Sleep(time.Second * c.span)
-	log.Println(c.Cookies())
 	return r, nil
 }
 
