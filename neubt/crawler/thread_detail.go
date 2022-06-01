@@ -2,7 +2,7 @@ package crawler
 
 import (
 	"crawler/neubt"
-	"crawler/neubt/html"
+	"crawler/util/html"
 	"log"
 	"strconv"
 )

@@ -1,8 +1,8 @@
 package dao
 
 import (
-	"crawler/neubt/html"
 	"crawler/storage"
+	"crawler/util/html"
 	"errors"
 	"log"
 	"strconv"

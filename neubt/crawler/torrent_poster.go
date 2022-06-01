@@ -3,8 +3,8 @@ package crawler
 import (
 	"bytes"
 	"crawler/neubt"
-	"crawler/neubt/html"
 	"crawler/util"
+	"crawler/util/html"
 	"github.com/gocolly/colly/v2"
 	"github.com/gogf/gf/v2/encoding/gcharset"
 	"github.com/pkg/errors"

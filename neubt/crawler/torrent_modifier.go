@@ -3,7 +3,7 @@ package crawler
 import (
 	"bytes"
 	"crawler/neubt"
-	"crawler/neubt/html"
+	"crawler/util/html"
 	"github.com/gocolly/colly/v2"
 	"github.com/pkg/errors"
 	"mime/multipart"

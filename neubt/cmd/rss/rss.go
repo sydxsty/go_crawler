@@ -4,7 +4,7 @@ import (
 	"crawler/neubt"
 	"crawler/neubt/crawler"
 	"crawler/neubt/dao"
-	"crawler/neubt/html"
+	"crawler/util/html"
 	"log"
 	"os"
 	"time"

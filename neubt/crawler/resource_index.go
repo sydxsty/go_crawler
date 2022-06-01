@@ -2,7 +2,7 @@ package crawler
 
 import (
 	"crawler/neubt"
-	"crawler/neubt/html"
+	"crawler/util/html"
 )
 
 // ResourceIndex process pages like http://bt.neu6.edu.cn/plugin.php?id=neubt_resourceindex
