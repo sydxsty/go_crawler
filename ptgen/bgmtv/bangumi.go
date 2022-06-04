@@ -134,33 +134,33 @@ func GenBangumi(client Client, link string) (map[string]interface{}, error) {
 	// 生成format
 	var des string
 	if len(coverAnother) != 0 {
-		des += `[img]` + coverAnother + `[/img]\n\n`
+		des += "[img]" + coverAnother + "[/img]\n\n"
 	}
 	if len(story) != 0 {
-		des += `[b]Story: [/b]\n\n` + story + `\n\n`
+		des += "[b]Story: [/b]\n\n" + story + "\n\n"
 	}
 	if len(staff) != 0 {
-		des += `[b]Staff: [/b]\n\n`
+		des += "[b]Staff: [/b]\n\n"
 		for i, v := range staff {
 			des += v + "\n"
 			if i == 15 {
 				break
 			}
 		}
-		des += `\n\n`
+		des += "\n\n"
 	}
 
 	if len(cast) != 0 {
-		des += `[b]Cast: [/b]\n\n`
+		des += "[b]Cast: [/b]\n\n"
 		for i, v := range cast {
 			des += v + "\n"
 			if i == 9 {
 				break
 			}
 		}
-		des += `\n\n`
+		des += "\n\n"
 	}
-	des += `(来源于 ` + link + ` )\n`
+	des += "(来源于 " + link + " )\n"
 	data["format"] = des
 	data["success"] = true
 	return data, nil
