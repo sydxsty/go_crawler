@@ -140,7 +140,6 @@ func init() {
 		"【喵萌Production】★01月新番★[CUE! 短篇动画/CUE! Short Anime][05-06][BDRip][1080p][简日双语][招募翻译]",
 		"[jibaketa合成&壓制][代理商粵語]咒術迴戰 咒胎戴天篇 / Jujutsu Kaisen 01-08 Fin [粵日雙語+內封繁體中文字幕][BD 1920x1080 x264 AACx2 SRT Ani-One CHT]",
 		"[GM-Team][国漫][凡人修仙传 再别天南][Fan Ren Xiu Xian Zhuan][2022][02-05][AVC][GB][1080P]",
-		"[桜都字幕组] 白金终局 / Platinum End [01-24 Fin][1080p][简体内嵌]",
 		"[VCB-Studio] Kono Subarashii Sekai ni Shukufuku wo! / 为美好的世界献上祝福！ 10-bit 1080p HEVC BDRip [S1-S2 Reseed + Movie Fin]",
 		"[雪飘工作室][Tropical-Rouge！Precure/トロピカル～ジュ！プリキュア][剧场版_冰雪公主与奇迹的戒指！][720p][简体内嵌](检索:光之美少女/Q娃) 附外挂字幕",
 		"[LoliHouse闹钟保护协会] 少女☆歌剧 剧场版 / Shoujo☆Kageki Revue Starlight Movie / 劇場版 少女☆歌劇 [BDRip 1920x804 HEVC-10bit FLAC]",
@@ -151,5 +150,7 @@ func init() {
 		"[NC-Raws] 键等 / Kaginado - 06 [B-Global][WEB-DL][1080p][AVC AAC][Multiple Subtitle][MKV]",
 		"【极影字幕社】LoveLive! 虹咲学园学园偶像同好会 第2期 第08集 加料剪辑版 GB_CN HEVC_opus 1080p",
 		"【千夏字幕组】【来玩游戏吧 / 游戏3人娘_Asobi Asobase】[第01-12话][BDRip_1080p_AVC][简体][修正合集]",
+		"【喵萌奶茶屋】★04月新番★[Estab Life: Great Escape][01-12END][1080p][简体][招募翻译校对]",
+		"[桜都字幕组] 白金终局 / Platinum End [01-24 Fin][1080p][简体内嵌]",
 	}
 }

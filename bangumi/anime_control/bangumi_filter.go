@@ -8,7 +8,6 @@ import (
 type BangumiFilter struct {
 	multiEpisode     *regexp.Regexp
 	singleEpisode    *regexp.Regexp
-	finEpisode       *regexp.Regexp
 	defaultDelimiter string
 	coarseDelimiter  string
 	seasonRegexp     *regexp.Regexp
@@ -20,9 +19,8 @@ type BangumiFilter struct {
 
 func NewBangumiFilter() *BangumiFilter {
 	bf := &BangumiFilter{
-		multiEpisode:     regexp.MustCompile(`[ 【\[第]([0-9]{1,2}-[0-9]{1,2})[】\] 话話集]`),
+		multiEpisode:     regexp.MustCompile(`[ 【\[第]([0-9]{1,2}-[0-9]{1,2}) ?(?i)(END|Fin)?[】\]话話集]`),
 		singleEpisode:    regexp.MustCompile(`[ 【\[第]([0-9]{1,3})[】\] 话話集]`),
-		finEpisode:       regexp.MustCompile(`[ 【\[](?i)( ?fin)[】\] ]`),
 		defaultDelimiter: " []&/【】()（）",
 		coarseDelimiter:  "[]/()【】",
 		seasonRegexp:     regexp.MustCompile(`([sS](0|)[0-9]+)|第.季|第.期`),
@@ -46,8 +44,8 @@ func (bf *BangumiFilter) GetMultiEpisode(episode string) string {
 		return ""
 	}
 	// check is season finished
-	finStr := bf.finEpisode.FindAllString(episode, -1)
-	if len(finStr) != 1 {
+	finStr := str[2]
+	if len(finStr) == 0 {
 		return str[1]
 	}
 	return str[1] + " Fin"
