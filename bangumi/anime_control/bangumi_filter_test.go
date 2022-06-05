@@ -152,5 +152,8 @@ func init() {
 		"【千夏字幕组】【来玩游戏吧 / 游戏3人娘_Asobi Asobase】[第01-12话][BDRip_1080p_AVC][简体][修正合集]",
 		"【喵萌奶茶屋】★04月新番★[Estab Life: Great Escape][01-12END][1080p][简体][招募翻译校对]",
 		"[桜都字幕组] 白金终局 / Platinum End [01-24 Fin][1080p][简体内嵌]",
+		"[悠哈璃羽字幕社&LoliHouse] 擅长捉弄的高木同学3 / Karakai Jōuzu no Takagi-san S3 [01-12合集][WebRip 1080p HEVC-10bit AAC][简繁内封字幕][Fin]",
+		"[风车字幕组][名侦探柯南][1044][猪肉味噌汤是命悬一线的信号][1080P][简体][MP4]",
+		"【喵鲁字幕组】影之诗F / Shadowverse Frame - 10[GB][1080P][MP4]",
 	}
 }
