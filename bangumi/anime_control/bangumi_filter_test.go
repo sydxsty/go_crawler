@@ -155,5 +155,7 @@ func init() {
 		"[悠哈璃羽字幕社&LoliHouse] 擅长捉弄的高木同学3 / Karakai Jōuzu no Takagi-san S3 [01-12合集][WebRip 1080p HEVC-10bit AAC][简繁内封字幕][Fin]",
 		"[风车字幕组][名侦探柯南][1044][猪肉味噌汤是命悬一线的信号][1080P][简体][MP4]",
 		"【喵鲁字幕组】影之诗F / Shadowverse Frame - 10[GB][1080P][MP4]",
+		"[桜都字幕组] 间谍过家家 / Spy x Family [09v2][1080p][简繁内封]",
+		"[喵萌奶茶屋&VCB-Studio] Bokutachi wa Benkyō ga Dekinai / 我们无法一起学习 / ぼくたちは勉強ができない 10-bit 1080p HEVC BDRip [S1 + S2 + OVA Fin]",
 	}
 }

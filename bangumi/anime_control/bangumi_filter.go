@@ -20,7 +20,7 @@ type BangumiFilter struct {
 func NewBangumiFilter() *BangumiFilter {
 	bf := &BangumiFilter{
 		multiEpisode:     regexp.MustCompile(`[ 【\[第]([0-9]{1,2}-[0-9]{1,2}) ?(?i)(END|Fin|合集)?[】\]话話集]`),
-		singleEpisode:    regexp.MustCompile(`[ 【\[第]([0-9]{1,4})[】\[\] 话話集]`),
+		singleEpisode:    regexp.MustCompile(`[ 【\[第]([0-9]{1,4}([Vv][2-9])?)[】\[\] 话話集]`),
 		defaultDelimiter: " []&/【】()（）",
 		coarseDelimiter:  "[]/()【】",
 		seasonRegexp:     regexp.MustCompile(`([sS](0|)[0-9]+)|第.季|第.期`),

@@ -27,7 +27,7 @@
 - name: 测不准的阿波连同学
   replace: ""
 - name: 名侦探柯南
-  replace: "名侦探柯南 1996"
+  replace: 名侦探柯南 1996
 - name: 群青开场号
   replace: ""
 - name: 辉夜大小姐想让我告白-超级浪漫-
@@ -158,7 +158,25 @@
   replace: ""
 - name: 擅长捉弄的高木同学
   replace: ""
-- name: NHK15个动画短片
-  replace: ""
+- name: 名侦探柯南番外-零的日常
+  replace: "名侦探柯南 零的日常"
 - name: 影之诗F
+  replace: ""
+- name: 白猫计划 ZERO CHRONICLE
+  replace: ""
+- name: 来自深渊 深邃的魂之黎明
+  replace: ""
+- name: 半妖的夜叉姬
+  replace: ""
+- name: 无职转生 ～在异世界认真地活下去～
+  replace: ""
+- name: Love Live! 虹咲学园校园偶像同好会
+  replace: ""
+- name: 18：与你相连的拼图游戏
+  replace: ""
+- name: 名侦探柯南 零的日常
+  replace: ""
+- name: 机动战士高达 库库鲁斯·杜安之岛
+  replace: ""
+- name: 我们真的学不来
   replace: ""
