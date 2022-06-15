@@ -5,11 +5,13 @@ import (
 	"crawler/bangumi/dao"
 	"crawler/storage"
 	"encoding/json"
+	"github.com/pkg/errors"
 	"log"
+	"strconv"
 )
 
 type Bangumi interface {
-	GetLatestAnimeListRaw() ([]interface{}, error)
+	GetAnimeListRaw(page int) ([]interface{}, error)
 	GetRecentAnimeListRaw() ([]interface{}, error)
 	GetMiscByTags(ids ...string) []map[string]interface{}
 	GetUserNameByTag(ids ...string) []map[string]interface{}
@@ -57,8 +59,11 @@ func GetAnimeNameList(b Bangumi, rawAnimeList []interface{}) []map[string]interf
 	return b.GetMiscByTags(tagList...)
 }
 
-func (b *BangumiImpl) GetLatestAnimeListRaw() ([]interface{}, error) {
-	resp, err := b.client.SyncVisit(`api/torrent/latest`)
+func (b *BangumiImpl) GetAnimeListRaw(page int) ([]interface{}, error) {
+	if page <= 0 {
+		return nil, errors.Errorf("error page index, %d.", page)
+	}
+	resp, err := b.client.SyncVisit(`api/torrent/page/` + strconv.Itoa(page))
 	if err != nil {
 		return nil, err
 	}

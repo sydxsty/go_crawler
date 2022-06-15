@@ -10,7 +10,7 @@ import (
 
 func TestGetAnimeList(t *testing.T) {
 	crawler := NewBangumi(client, kvStorage)
-	tl, err := crawler.GetLatestAnimeListRaw()
+	tl, err := crawler.GetAnimeListRaw(1)
 	assert.NoError(t, err, "error GetLatestAnimeListRaw")
 	bl, err := GetAnimeList(crawler, tl)
 	assert.NoError(t, err, "error GetLatestAnimeList")
@@ -24,7 +24,7 @@ func TestGetAnimeList(t *testing.T) {
 
 func TestGetAnimeNameList(t *testing.T) {
 	crawler := NewBangumi(client, kvStorage)
-	tl, err := crawler.GetLatestAnimeListRaw()
+	tl, err := crawler.GetAnimeListRaw(1)
 	assert.NoError(t, err, "error GetLatestAnimeListRaw")
 	bl := GetAnimeNameList(crawler, tl)
 	assert.True(t, len(bl) > 0)

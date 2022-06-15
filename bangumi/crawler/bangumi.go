@@ -10,7 +10,7 @@ import (
 // ScanBangumiTorrent call the callback when get a torrent info from website
 func ScanBangumiTorrent(bgm Bangumi, postTorrentFunc func(*dao.BangumiTorrentInfo)) error {
 	// init crawler
-	ral, err := bgm.GetLatestAnimeListRaw()
+	ral, err := bgm.GetAnimeListRaw(1)
 	if err != nil {
 		return err
 	}
