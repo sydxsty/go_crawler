@@ -217,7 +217,10 @@ func (b *BangumiTorrentInfo) SetJPNName(name string) {
 }
 
 func (b *BangumiTorrentInfo) GetContent() string {
-	return util.GetJsonStrFromStruct(b.content)
+	if len(b.content) < 5 {
+		return util.GetJsonStrFromStruct(b.content)
+	}
+	return util.GetJsonStrFromStruct(b.content[:4])
 }
 
 func (b *BangumiTorrentInfo) GetDetail() string {
