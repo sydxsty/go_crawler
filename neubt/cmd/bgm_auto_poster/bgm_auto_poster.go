@@ -156,8 +156,8 @@ func main() {
 		})
 		if err != nil {
 			log.Println("can not load bangumi latest torrents")
+			time.Sleep(time.Second * 60)
 		}
-		time.Sleep(time.Second * 600)
 	}
 }
 

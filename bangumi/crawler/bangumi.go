@@ -5,21 +5,27 @@ import (
 	"crawler/qbt"
 	"log"
 	"os"
+	"time"
 )
 
 // ScanBangumiTorrent call the callback when get a torrent info from website
 func ScanBangumiTorrent(bgm Bangumi, postTorrentFunc func(*dao.BangumiTorrentInfo)) error {
 	// init crawler
-	ral, err := bgm.GetAnimeListRaw(1)
-	if err != nil {
-		return err
-	}
-	al, err := GetAnimeList(bgm, ral)
-	if err != nil {
-		return err
-	}
-	for _, anime := range al {
-		postTorrentFunc(anime)
+	for i := 1; i < 5; i++ {
+		log.Printf("scanning page %d", i)
+		ral, err := bgm.GetAnimeListRaw(i)
+		if err != nil {
+			return err
+		}
+		al, err := GetAnimeList(bgm, ral)
+		if err != nil {
+			return err
+		}
+		for _, anime := range al {
+			postTorrentFunc(anime)
+		}
+		log.Println("wait 600 sec to continue")
+		time.Sleep(time.Second * 600)
 	}
 	log.Println("all torrent finished scanning, return")
 	return nil
