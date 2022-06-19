@@ -214,3 +214,20 @@ func (b *BangumiTorrentInfo) GetContent() string {
 func (b *BangumiTorrentInfo) GetDetail() string {
 	return util.GetJsonStrFromStruct(b.detail)
 }
+
+func (b *BangumiTorrentInfo) ContainsFinishedSeasons() bool {
+	if b.detail == nil {
+		return false
+	}
+	return b.detail.SEInfo.Finished
+}
+
+func (b *BangumiTorrentInfo) ContainsMovie() bool {
+	if b.detail == nil {
+		return false
+	}
+	if len(b.detail.SEInfo.Movie) > 0 {
+		return true
+	}
+	return false
+}
