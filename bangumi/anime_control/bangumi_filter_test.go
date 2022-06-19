@@ -65,10 +65,10 @@ func TestGetEpisode(t *testing.T) {
 	episodeFilter := NewBangumiFilter()
 	for _, in := range testCase {
 		res1 := episodeFilter.GetSingleEpisode(in)
-		res2 := episodeFilter.GetMultiEpisode(in)
+		res2, fin := episodeFilter.GetMultiEpisode(in)
 		res3 := episodeFilter.GetSeasonType(in)
 		res4 := episodeFilter.GetMovieType(in)
-		log.Printf("single: %s, multi: %s, season: %s, movie: %s", res1, res2, res3, res4)
+		log.Printf("single: %s, multi: %s, season: %s, movie: %s, finished: %v", res1, res2, res3, res4, fin)
 	}
 }
 
@@ -102,7 +102,8 @@ func TestIntegrate(t *testing.T) {
 		log.Printf("GetResolution: %s", getString(bgmFilter.GetResolution(in)))
 		log.Printf("GetMediaInfo: %s", getString(bgmFilter.GetMediaInfo(in)))
 		log.Printf("GetTeam: %s", getString(bgmFilter.GetTeam(in)))
-		log.Printf("GetSingleEpisode: %s", getString([]string{getString(bgmFilter.GetSeasonType(in)), bgmFilter.GetSingleEpisode(in), bgmFilter.GetMultiEpisode(in)}))
+		log.Printf("GetSingleEpisode: %s", getString([]string{getString(bgmFilter.GetSeasonType(in)), bgmFilter.GetSingleEpisode(in)}))
+		log.Println(bgmFilter.GetMultiEpisode(in))
 		log.Printf("GetMovie: %s", getString(bgmFilter.GetMovieType(in)))
 	}
 }

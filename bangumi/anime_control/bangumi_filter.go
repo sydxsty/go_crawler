@@ -38,18 +38,18 @@ func (bf *BangumiFilter) CoarseSplit(title string) []string {
 	return SplitByDelimiter(title, bf.coarseDelimiter)
 }
 
-// GetMultiEpisode append "Fin" to the end of the string if the episode is finished
-func (bf *BangumiFilter) GetMultiEpisode(episode string) string {
+// GetMultiEpisode return true if the episode is finished
+func (bf *BangumiFilter) GetMultiEpisode(episode string) (string, bool) {
 	str := bf.multiEpisode.FindStringSubmatch(episode)
 	if str == nil {
-		return ""
+		return "", false
 	}
 	// check is season finished
 	finStr := str[2]
 	if len(finStr) == 0 {
-		return str[1]
+		return str[1], false
 	}
-	return str[1] + " Fin"
+	return str[1], true
 }
 
 func (bf *BangumiFilter) GetSingleEpisode(episode string) string {

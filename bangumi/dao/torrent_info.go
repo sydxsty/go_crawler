@@ -27,7 +27,7 @@ type BangumiTorrentDetail struct {
 	Resolution  []string
 	Format      []string
 	Languages   []string
-	Episode     []string
+	SEInfo      *SEInfo
 }
 
 func NewTorrentInfoFromMap(raw map[string]interface{}) (*BangumiTorrentInfo, error) {
@@ -80,20 +80,7 @@ func (b *BangumiTorrentInfo) InitTorrentDetail(miscList []map[string]interface{}
 	d.Resolution = b.bgmFilter.GetResolution(b.Title)
 	d.Format = b.bgmFilter.GetMediaInfo(b.Title)
 	d.Teams = b.bgmFilter.GetTeam(b.Title)
-	// setup Episode
-	if v := b.bgmFilter.GetSingleEpisode(b.Title); v != "" {
-		d.Episode = []string{v}
-	}
-	// multi episodes can override single episode
-	if v := b.bgmFilter.GetMultiEpisode(b.Title); v != "" {
-		d.Episode = []string{v}
-	}
-	// no valid episode found, append season
-	if len(d.Episode) == 0 {
-		d.Episode = append(b.bgmFilter.GetSeasonType(b.Title), d.Episode...)
-	}
-	// if contains movie, append it
-	d.Episode = append(d.Episode, b.bgmFilter.GetMovieType(b.Title)...)
+	d.SEInfo = NewSEInfoFromTitle(b.Title, b.bgmFilter)
 }
 
 func getString(strList []string) string {
@@ -176,7 +163,7 @@ func (b *BangumiTorrentInfo) MustGetEpisode() string {
 	if b.detail == nil {
 		return ""
 	}
-	return getString(b.detail.Episode)
+	return getString(b.detail.SEInfo.GetEpisodeStringList())
 }
 
 func (b *BangumiTorrentInfo) MustGetFormat() string {
