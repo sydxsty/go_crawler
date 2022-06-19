@@ -233,7 +233,20 @@ func (p *Poster) downloadTorrentByLink(link string) error {
 }
 
 func UpdateWithTorrentInfo(poster neubtCrawler.TorrentPoster, info *dao.BangumiTorrentInfo) error {
-	poster.SetTidByName("连载动画")
+	// set poster type first
+	func() {
+		if info.ContainsFinishedSeasons() {
+			poster.SetTidByName("完结动画")
+			return
+		}
+		if info.ContainsMovie() {
+			poster.SetTidByName("剧场OVA")
+			return
+		}
+		poster.SetTidByName("连载动画")
+		return
+	}()
+	// set poster title name and comment name
 	poster.SetPostFileName(info.Title)
 	if info.MustGetCHSName() == "" {
 		return errors.New("no Chinese name or English name found in info")
