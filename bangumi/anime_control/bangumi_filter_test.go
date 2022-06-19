@@ -67,7 +67,8 @@ func TestGetEpisode(t *testing.T) {
 		res1 := episodeFilter.GetSingleEpisode(in)
 		res2 := episodeFilter.GetMultiEpisode(in)
 		res3 := episodeFilter.GetSeasonType(in)
-		log.Printf("single: %s, multi: %s, movie: %s", res1, res2, res3)
+		res4 := episodeFilter.GetMovieType(in)
+		log.Printf("single: %s, multi: %s, season: %s, movie: %s", res1, res2, res3, res4)
 	}
 }
 
@@ -122,6 +123,7 @@ func getString(strList []string) string {
 
 func init() {
 	testCase = []string{
+		"[7ACG x 桜都字幕组] 86 Eighty-Six/86 不存在的战区/86-エイティシックス- | 01-23 [日语+简繁字幕] BDrip 1080p x265 FLAC (repack)",
 		"【幻樱字幕组】【剧场版】【偶像梦幻祭 -Road to Show!!-  Ensemble Stars!! -Road to Show!!】【BDrip】【GB_MP4】【1920X1080】",
 		"[NC-Raws] 杜鵑婚約 [特別篇] / Kakkou no Iinazuke (A Couple of Cuckoos) - 05 (Baha 1920x1080 AVC AAC MP4)",
 		"【喵萌Production】★04月新番★[歌愈少女/Healer Girl][08][1080p][繁日雙語][招募翻譯]",
@@ -134,7 +136,6 @@ func init() {
 		"[Lilith-Raws] 川尻小玉的懶散生活 / Atasha Kawajiri Kodama Da yo - 17 [Baha][WEB-DL][1080p][AVC AAC][CHT][MP4]",
 		"[桜都字幕組] 3秒後、野獣。~在联谊会的角落里、他是肉食系 / 3 Byou Go, Yajuu. Goukon de Sumi ni Ita Kare wa Midara na Nikushoku Deshita [07][1080p][繁體內嵌]",
 		"[DHR动研字幕组&茉语星梦&VCB-Studio] DanManchi 3/ 在地下城寻求邂逅是否搞错了什么 第三季 8-bit 720p AVC BDRip [S3 MP4 CHS Ver]",
-		"[BDMV][220225][Words Worth Blu-ray Archive BOX SPECIAL EDITION][JP]",
 		"[LoliHouse] 攻壳机动队 SAC_2045 S2 / Ghost in the Shell SAC_2045 Season2 [WebRip 1080p HEVC-10bit AAC EAC3][简繁英日字幕][Fin]",
 		"[c.c動漫][4月新番][RPG不動產][03-08][BIG5][1080P][MP4]",
 		"【喵萌Production】★01月新番★[CUE! 短篇动画/CUE! Short Anime][05-06][BDRip][1080p][简日双语][招募翻译]",
@@ -157,5 +158,6 @@ func init() {
 		"【喵鲁字幕组】影之诗F / Shadowverse Frame - 10[GB][1080P][MP4]",
 		"[桜都字幕组] 间谍过家家 / Spy x Family [09v2][1080p][简繁内封]",
 		"[喵萌奶茶屋&VCB-Studio] Bokutachi wa Benkyō ga Dekinai / 我们无法一起学习 / ぼくたちは勉強ができない 10-bit 1080p HEVC BDRip [S1 + S2 + OVA Fin]",
+		"[BDMV][220225][Words Worth Blu-ray Archive BOX SPECIAL EDITION][JP]",
 	}
 }

@@ -82,14 +82,15 @@ func (b *BangumiTorrentInfo) InitTorrentDetail(miscList []map[string]interface{}
 	d.Teams = b.bgmFilter.GetTeam(b.Title)
 	// setup Episode
 	if v := b.bgmFilter.GetSingleEpisode(b.Title); v != "" {
-		d.Episode = append(d.Episode, v)
+		d.Episode = []string{v}
 	}
+	// multi episodes can override single episode
 	if v := b.bgmFilter.GetMultiEpisode(b.Title); v != "" {
-		d.Episode = append(d.Episode, v)
+		d.Episode = []string{v}
 	}
 	// no valid episode found, append season
 	if len(d.Episode) == 0 {
-		d.Episode = append(d.Episode, b.bgmFilter.GetSeasonType(b.Title)...)
+		d.Episode = append(b.bgmFilter.GetSeasonType(b.Title), d.Episode...)
 	}
 	// if contains movie, append it
 	d.Episode = append(d.Episode, b.bgmFilter.GetMovieType(b.Title)...)

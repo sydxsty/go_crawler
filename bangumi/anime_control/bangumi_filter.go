@@ -19,7 +19,7 @@ type BangumiFilter struct {
 
 func NewBangumiFilter() *BangumiFilter {
 	bf := &BangumiFilter{
-		multiEpisode:     regexp.MustCompile(`[ 【\[第]([0-9]{1,2}-[0-9]{1,2}) ?(?i)(END|Fin|合集)?[】\]话話集]`),
+		multiEpisode:     regexp.MustCompile(`[ 【\[第]([0-9]{1,2}-[0-9]{1,2}) ?(?i)(END|Fin|合集)?[】\] 话話集]`),
 		singleEpisode:    regexp.MustCompile(`[ 【\[第]([0-9]{1,4}([Vv][2-9])?)[】\[\] 话話集]`),
 		defaultDelimiter: " []&/【】()（）",
 		coarseDelimiter:  "[]/()【】",
@@ -38,6 +38,7 @@ func (bf *BangumiFilter) CoarseSplit(title string) []string {
 	return SplitByDelimiter(title, bf.coarseDelimiter)
 }
 
+// GetMultiEpisode append "Fin" to the end of the string if the episode is finished
 func (bf *BangumiFilter) GetMultiEpisode(episode string) string {
 	str := bf.multiEpisode.FindStringSubmatch(episode)
 	if str == nil {
@@ -56,7 +57,9 @@ func (bf *BangumiFilter) GetSingleEpisode(episode string) string {
 	if strList == nil {
 		return ""
 	}
-	for _, str := range strList {
+	// in a reverse order
+	for i := len(strList) - 1; i >= 0; i-- {
+		str := strList[i]
 		if len(str) > 0 && str[1][0] == '0' {
 			return str[1]
 		}
