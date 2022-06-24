@@ -124,6 +124,7 @@ func getString(strList []string) string {
 
 func init() {
 	testCase = []string{
+		"【悠哈璃羽字幕社】[86 -不存在的战区- / Eighty Six][23][x264 1080p][CHS]",
 		"[7ACG x 桜都字幕组] 86 Eighty-Six/86 不存在的战区/86-エイティシックス- | 01-23 [日语+简繁字幕] BDrip 1080p x265 FLAC (repack)",
 		"【幻樱字幕组】【剧场版】【偶像梦幻祭 -Road to Show!!-  Ensemble Stars!! -Road to Show!!】【BDrip】【GB_MP4】【1920X1080】",
 		"[NC-Raws] 杜鵑婚約 [特別篇] / Kakkou no Iinazuke (A Couple of Cuckoos) - 05 (Baha 1920x1080 AVC AAC MP4)",

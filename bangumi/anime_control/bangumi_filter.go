@@ -60,7 +60,7 @@ func (bf *BangumiFilter) GetSingleEpisode(episode string) string {
 	// in a reverse order
 	for i := len(strList) - 1; i >= 0; i-- {
 		str := strList[i]
-		if len(str) > 0 && str[1][0] == '0' {
+		if len(str) > 0 && str[1] != "" {
 			return str[1]
 		}
 	}
