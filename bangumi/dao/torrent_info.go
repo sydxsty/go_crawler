@@ -3,7 +3,7 @@ package dao
 import (
 	bgm "crawler/bangumi/anime_control"
 	"crawler/util"
-	"errors"
+	"github.com/pkg/errors"
 	"log"
 )
 
@@ -14,7 +14,7 @@ type BangumiTorrentInfo struct {
 	TeamId    string
 	TagIds    []interface{}
 	InfoHash  string
-	content   []interface{}
+	content   *TorrentFileList
 	detail    *BangumiTorrentDetail
 }
 
@@ -49,8 +49,14 @@ func NewTorrentInfoFromMap(raw map[string]interface{}) (*BangumiTorrentInfo, err
 	if b.InfoHash, ok = raw["infoHash"].(string); !ok {
 		return nil, errors.New("cannot get torrent info hash")
 	}
-	if b.content, ok = raw["content"].([]interface{}); !ok {
+	tc, ok := raw["content"].([]interface{})
+	if !ok {
 		return nil, errors.New("cannot get torrent content")
+	}
+	var err error
+	b.content, err = NewTorrentFileList(tc)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to covert torrent content")
 	}
 	return b, nil
 }
@@ -205,10 +211,12 @@ func (b *BangumiTorrentInfo) SetJPNName(name string) {
 }
 
 func (b *BangumiTorrentInfo) GetContent() string {
-	if len(b.content) < 5 {
-		return util.GetJsonStrFromStruct(b.content)
+	str, err := b.content.PrintToString(10)
+	if err != nil {
+		log.Println(err)
+		return ""
 	}
-	return util.GetJsonStrFromStruct(b.content[:4])
+	return str
 }
 
 func (b *BangumiTorrentInfo) GetDetail() string {
