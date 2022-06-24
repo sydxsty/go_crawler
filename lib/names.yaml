@@ -12,7 +12,7 @@
   replace: ""
 - name: 指名！
   replace: ""
-- name: Love All Play
+- name: 杜鹃的小闹剧
   replace: ""
 - name: 勇者斗恶龙 达伊的大冒险
   replace: ""
@@ -86,8 +86,8 @@
   replace: ""
 - name: 身为女主角 讨厌的女主角与秘密的工作
   replace: ""
-- name: 盾之勇者成名录
-  replace: ""
+- name: 社畜小姐想被幽靈幼女治愈。
+  replace: 社畜小姐想被幽灵幼女治愈。
 - name: 魔法纪录 魔法少女小圆外传 Final SEASON -浅梦的黎明-
   replace: ""
 - name: 约会大作战 第四季
@@ -159,8 +159,10 @@
 - name: 擅长捉弄的高木同学
   replace: ""
 - name: 名侦探柯南番外-零的日常
-  replace: "名侦探柯南 零的日常"
+  replace: 零的日常
 - name: 影之诗F
+  replace: ""
+- name: 名侦探柯南 Episode“ONE” 变小的名侦探
   replace: ""
 - name: 白猫计划 ZERO CHRONICLE
   replace: ""
@@ -179,4 +181,62 @@
 - name: 机动战士高达 库库鲁斯·杜安之岛
   replace: ""
 - name: 我们真的学不来
+  replace: ""
+- name: LoveLive! Sunshine!! 学园偶像 电影 彩虹彼端
+  replace: ""
+- name: 3秒后，野兽。～坐在联谊会角落的他是个肉食系
+  replace: ""
+- name: 四月是你的谎言
+  replace: ""
+- name: Re：从零开始的异世界生活
+  replace: ""
+- name: NHK15个动画短片
+  replace: ""
+- name: 转生成为了只有乙女游戏破灭Flag的邪恶大小姐X
+  replace: ""
+- name: 妖精森林的小不点
+  replace: ""
+- name: 更衣人偶坠入爱河
+  replace: ""
+- name: 时间支配者
+  replace: ""
+- name: Flip Flappers
+  replace: ""
+- name: 小林家的龙女仆S
+  replace: ""
+- name: 橘色荣耀
+  replace: ""
+- name: 行星与共
+  replace: ""
+- name: BanG Dream! 少女乐团派对！☆PICO
+  replace: ""
+- name: 86 -不存在的战区-
+  replace: ""
+- name: BEATLESS -没有心跳的少女-
+  replace: ""
+- name: 堀桑与宫村君
+  replace: ""
+- name: 异世界魔王与召唤少女的奴隶魔术OMEGA
+  replace: ""
+- name: 恋爱禁止的世界
+  replace: ""
+- name: 来玩游戏吧
+  replace: ""
+- name: 明日同学的水手服
+  replace: ""
+- name: 杜鹃小闹剧！
+  replace: ""
+- name: Love All Play
+  replace: ""
+- name: 橘色奇迹 -未来-
+  replace: ""
+- name: 政宗君的复仇
+  replace: ""
+- name: 盾之勇者成名录
+  replace: ""
+- name: 成神之日
+  replace: ""
+- name: 在魔王城说晚安
+  replace: ""
+- name: GIVEN 剧场版
   replace: ""

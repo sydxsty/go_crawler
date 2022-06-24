@@ -62,6 +62,6 @@ func TestTorrentInfo(t *testing.T) {
 	assert.True(t, res == "1080p")
 	ep := ti.MustGetEpisode()
 	assert.True(t, ep == "10")
-	co := ti.GetContent()
+	co := ti.GetTorrentContent()
 	log.Println(co)
 }
