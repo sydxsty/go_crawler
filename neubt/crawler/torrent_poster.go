@@ -85,6 +85,9 @@ func (t *TorrentPosterImpl) SetTidByName(name string) bool {
 }
 
 func (t *TorrentPosterImpl) SetPostFileName(name string) {
+	if name == "" {
+		name = "default_torrent_name"
+	}
 	t.postFileName = name
 }
 

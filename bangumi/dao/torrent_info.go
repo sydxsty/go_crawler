@@ -210,13 +210,17 @@ func (b *BangumiTorrentInfo) SetJPNName(name string) {
 	b.detail.JpnName = name
 }
 
-func (b *BangumiTorrentInfo) GetContent() string {
-	str, err := b.content.PrintToString(10)
+func (b *BangumiTorrentInfo) GetTorrentContent() string {
+	str, err := b.content.PrintToString(20)
 	if err != nil {
 		log.Println(err)
 		return ""
 	}
 	return str
+}
+
+func (b *BangumiTorrentInfo) GetTorrentName() string {
+	return b.content.GetTorrentName()
 }
 
 func (b *BangumiTorrentInfo) GetDetail() string {

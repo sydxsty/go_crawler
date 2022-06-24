@@ -247,7 +247,7 @@ func UpdateWithTorrentInfo(poster neubtCrawler.TorrentPoster, info *dao.BangumiT
 		return
 	}()
 	// set poster title name and comment name
-	poster.SetPostFileName(info.Title)
+	poster.SetPostFileName(info.GetTorrentName())
 	if info.MustGetCHSName() == "" {
 		return errors.New("no Chinese name or English name found in info")
 	}
@@ -269,7 +269,7 @@ func UpdateWithTorrentInfo(poster neubtCrawler.TorrentPoster, info *dao.BangumiT
 		"Debug info:",
 		"原种标题："+info.Title,
 		"种子信息："+info.GetDetail(),
-		"种子内容："+info.GetContent(),
+		"种子内容："+info.GetTorrentContent(),
 		"[/code]",
 	)
 	return nil
