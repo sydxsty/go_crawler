@@ -33,6 +33,7 @@ neubt/cmd/bgm_auto_poster/bgm_auto_poster.go
 1. 安装mediainfo
 ```shell
 sudo apt install mediainfo -y
+ln -s $(which mediainfo) ./lib/mediainfo
 ```
 2. 解压lab目录下的mtn.rar到运行./lib/目录下
 3. 填写./data/下的配置文件

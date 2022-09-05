@@ -27,7 +27,7 @@ type ClientImpl struct {
 func NewClient(db storage.KVStorage) (Client, error) {
 	client := &ClientImpl{}
 	var err error
-	link := "http://[2001:da8:9000::232]"
+	link := "http://[2001:da8:9000:e100::27]"
 	client.domain, err = url.Parse(link)
 	if err != nil {
 		return nil, err

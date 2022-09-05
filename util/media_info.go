@@ -44,7 +44,13 @@ func GetMediaImage(execFileDir, mediaPath, mediaName string) ([]byte, error) {
 		}
 		return nil
 	}
-	err := ExecCmd(execFileDir, filepath.Join(execFileDir, `mtn`), []string{"-c", "4", "-r", "3", "-P", "-O", execFileDir, filepath.Join(mediaPath, mediaName)}, callback)
+	err := ExecCmd(execFileDir, filepath.Join(execFileDir, `mtn`), []string{
+		"-f", filepath.Join(execFileDir, `tahomabd.ttf`),
+		"-c", "4",
+		"-r", "3",
+		"-P",
+		"-O", execFileDir, filepath.Join(mediaPath, mediaName)},
+		callback)
 	if err != nil {
 		return nil, errors.Wrap(err, "generate media info failed")
 	}
