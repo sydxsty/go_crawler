@@ -5,6 +5,7 @@ import (
 	"crawler/util"
 	"github.com/pkg/errors"
 	"log"
+	"strings"
 )
 
 type BangumiTorrentInfo struct {
@@ -232,6 +233,19 @@ func (b *BangumiTorrentInfo) ContainsFinishedSeasons() bool {
 		return false
 	}
 	return b.detail.SEInfo.Finished
+}
+
+func (b *BangumiTorrentInfo) IsBDRip() bool {
+	if b.detail == nil {
+		return false
+	}
+	for _, tag := range b.detail.Format {
+		lower := strings.ToLower(tag)
+		if lower == "bdrip" || lower == "bd" {
+			return true
+		}
+	}
+	return false
 }
 
 func (b *BangumiTorrentInfo) ContainsMovie() bool {

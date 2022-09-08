@@ -46,10 +46,15 @@ func (bf *BangumiFilter) GetMultiEpisode(episode string) (string, bool) {
 	}
 	// check is season finished
 	finStr := str[2]
-	if len(finStr) == 0 {
-		return str[1], false
+	if len(finStr) != 0 {
+		return str[1], true
 	}
-	return str[1], true
+	// Additional check if it is a complete set (01-12, 01-13, 01-24)
+	finLikeMap := map[string]interface{}{"01-12": nil, "01-13": nil, "01-24": nil}
+	if _, ok := finLikeMap[str[1]]; ok {
+		return str[1], true
+	}
+	return str[1], false
 }
 
 func (bf *BangumiFilter) GetSingleEpisode(episode string) string {

@@ -243,6 +243,11 @@ func UpdateWithTorrentInfo(poster neubtCrawler.TorrentPoster, info *dao.BangumiT
 			poster.SetTidByName("剧场OVA")
 			return
 		}
+		// filter torrents further
+		if info.IsBDRip() {
+			poster.SetTidByName("完结动画")
+			return
+		}
 		poster.SetTidByName("连载动画")
 		return
 	}()

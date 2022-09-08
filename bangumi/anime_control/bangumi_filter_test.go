@@ -161,5 +161,6 @@ func init() {
 		"[桜都字幕组] 间谍过家家 / Spy x Family [09v2][1080p][简繁内封]",
 		"[喵萌奶茶屋&VCB-Studio] Bokutachi wa Benkyō ga Dekinai / 我们无法一起学习 / ぼくたちは勉強ができない 10-bit 1080p HEVC BDRip [S1 + S2 + OVA Fin]",
 		"[BDMV][220225][Words Worth Blu-ray Archive BOX SPECIAL EDITION][JP]",
+		"【喵萌奶茶屋】★04月新番★[恋爱要在征服世界后/Koi wa Sekai Seifuku no Ato de][01-12][1080p][简日双语][招募翻译]",
 	}
 }
