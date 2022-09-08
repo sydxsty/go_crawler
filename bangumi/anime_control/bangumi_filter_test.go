@@ -124,6 +124,7 @@ func getString(strList []string) string {
 
 func init() {
 	testCase = []string{
+		"[爱恋&漫猫字幕组][7月新番][OVERLORD 第四季][Overlord IV][10+小剧场][1080p][MP4][GB][简中]",
 		"【悠哈璃羽字幕社】[86 -不存在的战区- / Eighty Six][23][x264 1080p][CHS]",
 		"[7ACG x 桜都字幕组] 86 Eighty-Six/86 不存在的战区/86-エイティシックス- | 01-23 [日语+简繁字幕] BDrip 1080p x265 FLAC (repack)",
 		"【幻樱字幕组】【剧场版】【偶像梦幻祭 -Road to Show!!-  Ensemble Stars!! -Road to Show!!】【BDrip】【GB_MP4】【1920X1080】",
@@ -161,6 +162,6 @@ func init() {
 		"[桜都字幕组] 间谍过家家 / Spy x Family [09v2][1080p][简繁内封]",
 		"[喵萌奶茶屋&VCB-Studio] Bokutachi wa Benkyō ga Dekinai / 我们无法一起学习 / ぼくたちは勉強ができない 10-bit 1080p HEVC BDRip [S1 + S2 + OVA Fin]",
 		"[BDMV][220225][Words Worth Blu-ray Archive BOX SPECIAL EDITION][JP]",
-		"【喵萌奶茶屋】★04月新番★[恋爱要在征服世界后/Koi wa Sekai Seifuku no Ato de][01-12][1080p][简日双语][招募翻译]",
+		"【喵萌奶茶屋】★04月新番★[恋爱要在征服世界后/Koi wa Sekai Seifuku no Ato de][01-12+SP][1080p][简日双语][招募翻译]",
 	}
 }

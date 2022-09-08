@@ -19,12 +19,13 @@ type BangumiFilter struct {
 
 func NewBangumiFilter() *BangumiFilter {
 	bf := &BangumiFilter{
-		multiEpisode:     regexp.MustCompile(`[ 【\[第]([0-9]{1,2}-[0-9]{1,2}) ?(?i)(END|Fin|合集)?[】\] 话話集]`),
-		singleEpisode:    regexp.MustCompile(`[ 【\[第]([0-9]{1,4}([Vv][2-9])?)[】\[\] 话話集]`),
-		defaultDelimiter: " []&/【】()（）",
+		multiEpisode:     regexp.MustCompile(`[ 【\[第]([0-9]{1,2}-[0-9]{1,2}) ?(?i)(END|Fin|合集)?[】\]+ 话話集]`),
+		singleEpisode:    regexp.MustCompile(`[ 【\[第]([0-9]{1,4}([Vv][2-9])?)[】\[\]+ 话話集]`),
+		defaultDelimiter: " []&/+【】()（）",
 		coarseDelimiter:  "[]/()【】",
 		seasonRegexp:     regexp.MustCompile(`([sS](0|)[0-9]+)|第.季|第.期`),
-		movieRegexp:      regexp.MustCompile(`剧场版|OVA|OAD|(?i)Movie`),
+		// strict matching, also match the start and end of a substr
+		movieRegexp: regexp.MustCompile(`^(?i)(剧场版|OVA|SP|OAD|Movie)$`),
 		// currently, |字幕社|工作室 are not included in teams
 		teamRegexp:       regexp.MustCompile(`喵萌|LoliHouse|字幕组|悠哈璃羽字幕社`),
 		resolutionRegexp: regexp.MustCompile("[0-9]{3,}[pPiI]|[24][kK]|[0-9]{3,4}[xX][0-9]{3,4}"),
