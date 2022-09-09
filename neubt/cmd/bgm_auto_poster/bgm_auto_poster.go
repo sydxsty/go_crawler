@@ -57,11 +57,34 @@ func NewPoster() *Poster {
 func main() {
 	p := NewPoster()
 	for {
-		//err := crawler.CrawlAllTorrents(p.bgm, []string{"喵萌奶茶屋", "异世界舅舅"}, p.BGMSearchCallback)
-		err := crawler.ScanBangumiTorrent(p.bgm, p.BGMSearchCallback)
-		if err != nil {
-			log.Println("can not load bangumi latest torrents")
-			time.Sleep(time.Second * 60)
+		DefaultIndexCrawler(p)
+		// KeyWordCrawler(p)
+		log.Println("wait 600 sec to recheck")
+		time.Sleep(time.Second * 600)
+	}
+}
+
+func DefaultIndexCrawler(p *Poster) {
+	err := crawler.ScanBangumiTorrent(p.bgm, p.BGMSearchCallback)
+	if err != nil {
+		log.Println("can not load bangumi latest torrents")
+		time.Sleep(time.Second * 60)
+	}
+}
+
+func KeyWordCrawler(p *Poster) {
+	priorityTeamList := []string{"喵萌奶茶屋"}
+	addition := []string{"合集"}
+	animeList := []string{"间谍过家家", "rpg不动产", "cue"}
+	for _, aniName := range animeList {
+		for _, teamName := range priorityTeamList {
+			err := crawler.CrawlAllTorrents(p.bgm, append([]string{teamName, aniName}, addition...), p.BGMSearchCallback)
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+			log.Println("target torrent found")
+			break
 		}
 	}
 }

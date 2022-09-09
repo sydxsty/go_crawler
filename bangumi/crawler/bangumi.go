@@ -3,13 +3,14 @@ package crawler
 import (
 	"crawler/bangumi/dao"
 	"crawler/qbt"
+	"github.com/pkg/errors"
 	"log"
 	"os"
 	"time"
 )
 
 // ScanBangumiTorrent call the callback when get a torrent info from website
-func ScanBangumiTorrent(bgm Bangumi, postTorrentFunc func(*dao.BangumiTorrentInfo)) error {
+func ScanBangumiTorrent(bgm Bangumi, callback func(*dao.BangumiTorrentInfo)) error {
 	// init crawler
 	for i := 1; i < 5; i++ {
 		log.Printf("scanning page %d", i)
@@ -22,16 +23,16 @@ func ScanBangumiTorrent(bgm Bangumi, postTorrentFunc func(*dao.BangumiTorrentInf
 			return err
 		}
 		for _, anime := range al {
-			postTorrentFunc(anime)
+			callback(anime)
 		}
-		log.Println("wait 600 sec to continue")
-		time.Sleep(time.Second * 600)
+		log.Println("wait 300 sec to continue")
+		time.Sleep(time.Second * 300)
 	}
 	log.Println("all torrent finished scanning, return")
 	return nil
 }
 
-func CrawlAllTorrents(bgm Bangumi, keywords []string, postTorrentFunc func(*dao.BangumiTorrentInfo)) error {
+func CrawlAllTorrents(bgm Bangumi, keywords []string, callback func(*dao.BangumiTorrentInfo)) error {
 	// init crawler
 	var tags []string
 	for _, keyword := range keywords {
@@ -52,6 +53,9 @@ func CrawlAllTorrents(bgm Bangumi, keywords []string, postTorrentFunc func(*dao.
 			return err
 		}
 		if len(tl) == 0 {
+			if i == 1 {
+				return errors.New("no valid result found")
+			}
 			break
 		}
 		al, err := GetAnimeList(bgm, tl)
@@ -59,14 +63,12 @@ func CrawlAllTorrents(bgm Bangumi, keywords []string, postTorrentFunc func(*dao.
 			return err
 		}
 		for _, anime := range al {
-			postTorrentFunc(anime)
+			callback(anime)
 		}
 		log.Println("wait 10 sec to continue")
 		time.Sleep(time.Second * 10)
 	}
 	log.Println("all torrent finished scanning, return")
-	log.Println("wait 600 sec to recheck")
-	time.Sleep(time.Second * 600)
 	return nil
 }
 
