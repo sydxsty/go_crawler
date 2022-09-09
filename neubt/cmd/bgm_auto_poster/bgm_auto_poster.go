@@ -57,103 +57,7 @@ func NewPoster() *Poster {
 func main() {
 	p := NewPoster()
 	for {
-		err := crawler.ScanBangumiTorrent(p.bgm, func(ti *dao.BangumiTorrentInfo) {
-			log.Println("--------Analysing torrent: ", ti.Title, "--------")
-			if p.bgmTrMgr.TorrentIsPosted(ti.InfoHash) {
-				// if posted, continue
-				log.Println("torrent is already posted, skip")
-				return
-			}
-			if p.Webui.Contains(ti.InfoHash) && !p.Webui.Completed(ti.InfoHash) {
-				log.Println("torrent is downloading: ", ti.InfoHash)
-				return
-			}
-			// 1. torrent not exist
-			// 2. torrent completed
-			detail, err := p.GetTorrentPTGenDetail(ti)
-			if err != nil {
-				log.Println("no matching result in ptgen: ", err)
-				return
-			}
-			log.Printf("CHSName: %s, ENGName: %s, JPNName: %s", ti.MustGetCHSName(), ti.MustGetENGName(), ti.MustGetJPNName())
-			// for torrents not exist
-			if !p.Webui.Completed(ti.InfoHash) {
-				log.Println("start download torrent from bangumi")
-				if err := p.bgmTrMgr.CanDownloadFromBangumi(ti); err != nil {
-					log.Println("filter failure reason", err)
-					return
-				}
-				torrentURL, err := ti.GetTorrentDownloadURL()
-				if err != nil {
-					log.Println("filter failure reason", err)
-					return
-				}
-				_, err = crawler.DownloadBangumiTorrentToFile(
-					torrentURL,
-					p.Config.TorrentPath,
-					ti.InfoHash,
-					p.bgmDownloader,
-					p.Webui)
-				if err != nil {
-					log.Println("can not download bangumi torrent", err)
-				}
-				log.Println("downloaded torrent: ", ti.MustGetCHSName())
-				return
-			}
-			// for completed torrents
-			log.Println("prepare to post torrent: ", ti.MustGetCHSName())
-			// pause torrent to reduce network overhead
-			err = p.Webui.Pause(ti.InfoHash)
-			if err != nil {
-				log.Println("can not pause torrent, webui may have fault: ", err)
-				return
-			}
-			poster, err := neubtCrawler.NewTorrentPoster("44", p.Client)
-			if err != nil {
-				log.Println("failed to create neubt poster: ", err)
-				return
-			}
-			err = UpdateWithTorrentInfo(poster, ti)
-			if err != nil {
-				log.Println("failed to update bangumi torrent info: ", err)
-				return
-			}
-			err = poster.SetPTGENContent(detail.Detail)
-			if err != nil {
-				log.Println("failed to SetPTGENContent: ", err)
-			}
-			mediaInfo, thumb, err := GetMediaInfoFromWEBUI(ti.InfoHash, p.Webui)
-			if err != nil {
-				log.Println("failed to get media info: ", err)
-				return
-			}
-			poster.SetMediaInfoContent(mediaInfo)
-			err = poster.SetTorrentThumb(thumb, "jpg")
-			if err != nil {
-				log.Println("failed to create neubt media thumb, proceed: ", err)
-			}
-			data, err := crawler.LoadTorrentFromFile(p.Config.TorrentPath, ti.InfoHash)
-			if err != nil {
-				log.Println("failed to load torrent from disk: ", err)
-				return
-			}
-			// wait for 5 second
-			time.Sleep(time.Second * 5)
-			// mark the torrent posted
-			p.bgmTrMgr.SetTorrentPostedState(ti.InfoHash)
-			url, err := poster.PostTorrentMultiPart(data)
-			if err != nil {
-				log.Println("failed to post torrent to neu bt: ", err)
-				return
-			}
-			// wait for 5 second
-			time.Sleep(time.Second * 5)
-			err = p.downloadTorrentByLink(url)
-			if err != nil {
-				log.Println("failed to download post torrent to neu bt: ", err)
-				return
-			}
-		})
+		err := crawler.ScanBangumiTorrent(p.bgm, p.BGMSearchCallback)
 		if err != nil {
 			log.Println("can not load bangumi latest torrents")
 			time.Sleep(time.Second * 60)
@@ -161,8 +65,118 @@ func main() {
 	}
 }
 
-// GetTorrentPTGenDetail the info will be updated
-func (p *Poster) GetTorrentPTGenDetail(info *dao.BangumiTorrentInfo) (*ptgen.BangumiInfoDetail, error) {
+// BGMSearchCallback Analyze torrent information returned by a bangumi search
+// If it meets the download requirements, download the torrent and publish to neubt
+func (p *Poster) BGMSearchCallback(ti *dao.BangumiTorrentInfo) {
+	log.Println("--------Analysing torrent: ", ti.Title, "--------")
+	if p.bgmTrMgr.TorrentIsPosted(ti.InfoHash) {
+		// if posted, continue
+		log.Println("torrent is already posted, skip")
+		return
+	}
+	if p.Webui.Contains(ti.InfoHash) && !p.Webui.Completed(ti.InfoHash) {
+		log.Println("torrent is downloading: ", ti.InfoHash)
+		return
+	}
+	// 1. torrent not exist
+	// 2. torrent completed
+	detail, err := p.UpdateTorrentInfoWithPTGen(ti)
+	if err != nil {
+		log.Println("no matching result in ptgen: ", err)
+		return
+	}
+	log.Printf("CHSName: %s, ENGName: %s, JPNName: %s", ti.MustGetCHSName(), ti.MustGetENGName(), ti.MustGetJPNName())
+	// 1. for torrents not exist
+	if !p.Webui.Completed(ti.InfoHash) {
+		if err := p.DownloadTorrentFromBGM(ti); err != nil {
+			log.Println("Can not download torrent: ", err)
+		}
+		// Finish processing the torrent, return
+		return
+	}
+	// 2. for completed torrents
+	url, err := p.PostTorrentToNeubt(ti, detail.Detail)
+	if err != nil {
+		log.Println("failed to post torrent to neubt: ", err)
+		return
+	}
+	// 3. re-download the torrent from neubt
+	time.Sleep(time.Second * 5)
+	err = p.DownloadTorrentFromNeubt(url)
+	if err != nil {
+		log.Println("failed to download post torrent to neu bt: ", err)
+		return
+	}
+}
+
+// PostTorrentToNeubt check and post torrent to neubt
+// ti: thr torrent info
+// description: A brief description of the anime, usually generated using ptgen
+func (p *Poster) PostTorrentToNeubt(ti *dao.BangumiTorrentInfo, description string) (string, error) {
+	log.Println("prepare to post torrent: ", ti.MustGetCHSName())
+	// pause torrent to reduce network overhead
+	err := p.Webui.Pause(ti.InfoHash)
+	if err != nil {
+		return "", errors.Wrap(err, "can not pause torrent, webui may have fault")
+	}
+	poster, err := neubtCrawler.NewTorrentPoster("44", p.Client)
+	if err != nil {
+		return "", errors.Wrap(err, "failed to create neubt poster")
+	}
+	err = UpdateWithTorrentInfo(poster, ti)
+	if err != nil {
+		return "", errors.Wrap(err, "failed to update bangumi torrent info")
+	}
+	err = poster.SetPTGENContent(description)
+	if err != nil {
+		log.Println("failed to SetPTGENContent: ", err)
+	}
+	mediaInfo, thumb, err := GetMediaInfoFromWEBUI(ti.InfoHash, p.Webui)
+	if err != nil {
+		return "", errors.Wrap(err, "failed to get media info")
+	}
+	poster.SetMediaInfoContent(mediaInfo)
+	err = poster.SetTorrentThumb(thumb, "jpg")
+	if err != nil {
+		log.Println("failed to create neubt media thumb, proceed: ", err)
+	}
+	data, err := crawler.LoadTorrentFromFile(p.Config.TorrentPath, ti.InfoHash)
+	if err != nil {
+		return "", errors.Wrap(err, "failed to load torrent from disk")
+	}
+	// wait for 5 second
+	time.Sleep(time.Second * 5)
+	// mark the torrent posted
+	p.bgmTrMgr.SetTorrentPostedState(ti.InfoHash)
+	return poster.PostTorrentMultiPart(data)
+}
+
+// DownloadTorrentFromBGM Check filters, download torrents from bgm, and upload to qbittorrent
+func (p *Poster) DownloadTorrentFromBGM(ti *dao.BangumiTorrentInfo) error {
+	log.Println("start download torrent from bangumi")
+	if err := p.bgmTrMgr.CanDownloadFromBangumi(ti); err != nil {
+		return errors.Wrap(err, "filter failure")
+	}
+	torrentURL, err := ti.GetTorrentDownloadURL()
+	if err != nil {
+		return err
+	}
+	_, err = crawler.DownloadBangumiTorrentToFile(
+		torrentURL,
+		p.Config.TorrentPath,
+		ti.InfoHash,
+		p.bgmDownloader,
+		p.Webui)
+	if err != nil {
+		return errors.Wrap(err, "can not download bangumi torrent")
+	}
+	log.Println("downloaded torrent: ", ti.MustGetCHSName())
+	return nil
+}
+
+// UpdateTorrentInfoWithPTGen the torrent info will be updated
+// func also return the ptgen execution result
+func (p *Poster) UpdateTorrentInfoWithPTGen(info *dao.BangumiTorrentInfo) (*ptgen.BangumiInfoDetail, error) {
 	alias := p.ani.GetAliasCHSName(info.Title)
 	if alias != "" {
 		info.SetCHSName(alias)
@@ -203,7 +217,7 @@ func (p *Poster) GetTorrentPTGenDetail(info *dao.BangumiTorrentInfo) (*ptgen.Ban
 	return nil, errors.New("no matching result")
 }
 
-func (p *Poster) downloadTorrentByLink(link string) error {
+func (p *Poster) DownloadTorrentFromNeubt(link string) error {
 	detail := neubtCrawler.NewThreadDetail(p.Client)
 	torrentURLs, err := detail.GetFloorDetailFromThread(link)
 	if err != nil {
