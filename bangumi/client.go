@@ -2,6 +2,7 @@ package bangumi
 
 import (
 	"crawler/util"
+	"encoding/json"
 	"github.com/gocolly/colly/v2"
 )
 
@@ -9,6 +10,7 @@ type Client interface {
 	util.Client
 	Clone() Client
 	Reset()
+	SyncPostJson(link string, requestData map[string]interface{}) (*colly.Response, error)
 }
 
 type ClientImpl struct {
@@ -46,4 +48,13 @@ func (c *ClientImpl) Reset() {
 		r.Headers.Set("Accept-Encoding", "deflate")
 		r.Headers.Set("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8")
 	})
+}
+
+// SyncPostJson SyncPost only post json rpc
+func (c *ClientImpl) SyncPostJson(link string, requestData map[string]interface{}) (*colly.Response, error) {
+	raw, err := json.Marshal(requestData)
+	if err != nil {
+		return nil, err
+	}
+	return c.SyncPostRaw(link, raw)
 }

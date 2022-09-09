@@ -5,14 +5,15 @@ import (
 	"crawler/bangumi/dao"
 	"crawler/storage"
 	"encoding/json"
+	"github.com/gocolly/colly/v2"
 	"github.com/pkg/errors"
 	"log"
 	"strconv"
 )
 
 type Bangumi interface {
-	GetAnimeListRaw(page int) ([]interface{}, error)
-	GetRecentAnimeListRaw() ([]interface{}, error)
+	GetTagByKeyWord(keyword string) ([]string, error)
+	GetAnimeListRawByTag(tag string, page int) ([]interface{}, error)
 	GetMiscByTags(ids ...string) []map[string]interface{}
 	GetUserNameByTag(ids ...string) []map[string]interface{}
 	GetTeamByTag(ids ...string) []map[string]interface{}
@@ -59,11 +60,77 @@ func GetAnimeNameList(b Bangumi, rawAnimeList []interface{}) []map[string]interf
 	return b.GetMiscByTags(tagList...)
 }
 
-func (b *BangumiImpl) GetAnimeListRaw(page int) ([]interface{}, error) {
+func (b *BangumiImpl) GetTagByKeyWord(keyword string) ([]string, error) {
+	resp, err := b.client.SyncPostJson(`api/tag/search`, map[string]interface{}{
+		"keywords": true,
+		"multi":    true,
+		"name":     keyword,
+	})
+	if err != nil {
+		return nil, err
+	}
+	var result map[string]interface{}
+	err = json.Unmarshal(resp.Body, &result)
+	if err != nil {
+		return nil, err
+	}
+	for _, k := range []string{"success", "found"} {
+		if ok1, ok2 := result[k]; !ok2 {
+			return nil, errors.New("key-value pair not found, " + k)
+		} else {
+			if ok3, ok4 := ok1.(bool); !ok3 || !ok4 {
+				return nil, errors.New("keyword contains no result, " + k)
+			}
+		}
+	}
+	var ids []string
+	if tags, ok := result["tag"]; !ok {
+		return nil, errors.New("bgm interface is updated, please update your code, " + keyword)
+	} else {
+		_, ok = tags.([]interface{})
+		if !ok {
+			return nil, errors.New("bgm interface is updated, please update your code, " + keyword)
+		}
+		for _, tag := range tags.([]interface{}) {
+			_, ok = tag.(map[string]interface{})
+			if !ok {
+				log.Printf("%s: tag response is not a map", keyword)
+				continue
+			}
+			id, ok := tag.(map[string]interface{})["_id"]
+			if !ok {
+				log.Printf("%s: tag id not found", keyword)
+				continue
+			}
+			idStr, ok := id.(string)
+			if !ok {
+				log.Printf("%s: tag id is not a string", keyword)
+				continue
+			}
+			ids = append(ids, idStr)
+		}
+	}
+	return ids, nil
+}
+
+func (b *BangumiImpl) GetAnimeListRawByTag(tag string, page int) ([]interface{}, error) {
 	if page <= 0 {
 		return nil, errors.Errorf("error page index, %d.", page)
 	}
-	resp, err := b.client.SyncVisit(`api/torrent/page/` + strconv.Itoa(page))
+	var processFunc func() (*colly.Response, error)
+	if tag == "" {
+		processFunc = func() (*colly.Response, error) {
+			return b.client.SyncVisit(`api/torrent/page/` + strconv.Itoa(page))
+		}
+	} else {
+		processFunc = func() (*colly.Response, error) {
+			return b.client.SyncPostJson(`api/torrent/search`, map[string]interface{}{
+				"tag_id": []string{tag},
+				"p":      page,
+			})
+		}
+	}
+	resp, err := processFunc()
 	if err != nil {
 		return nil, err
 	}
@@ -73,19 +140,6 @@ func (b *BangumiImpl) GetAnimeListRaw(page int) ([]interface{}, error) {
 		return nil, err
 	}
 	return tl["torrents"].([]interface{}), nil
-}
-
-func (b *BangumiImpl) GetRecentAnimeListRaw() ([]interface{}, error) {
-	resp, err := b.client.SyncVisit(`api/torrent/recent`)
-	if err != nil {
-		return nil, err
-	}
-	var tl []interface{}
-	err = json.Unmarshal(resp.Body, &tl)
-	if err != nil {
-		return nil, err
-	}
-	return tl, nil
 }
 
 func (b *BangumiImpl) GetMiscByTags(ids ...string) []map[string]interface{} {
@@ -129,13 +183,9 @@ func (b *BangumiImpl) getBufferedPropertyByTag(ids []string, link string) []map[
 }
 
 func (b *BangumiImpl) getPropertyByTag(id []string, link string) ([]map[string]interface{}, error) {
-	postData := make(map[string]interface{})
-	postData["_ids"] = id
-	raw, err := json.Marshal(postData)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := b.client.SyncPostRaw(link, raw)
+	resp, err := b.client.SyncPostJson(link, map[string]interface{}{
+		"_ids": id,
+	})
 	if err != nil {
 		return nil, err
 	}

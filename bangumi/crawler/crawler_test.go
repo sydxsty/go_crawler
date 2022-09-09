@@ -10,27 +10,29 @@ import (
 
 func TestGetAnimeList(t *testing.T) {
 	crawler := NewBangumi(client, kvStorage)
-	tl, err := crawler.GetAnimeListRaw(1)
-	assert.NoError(t, err, "error GetLatestAnimeListRaw")
-	bl, err := GetAnimeList(crawler, tl)
-	assert.NoError(t, err, "error GetLatestAnimeList")
-	assert.True(t, len(bl) > 0)
-	tl, err = crawler.GetRecentAnimeListRaw()
-	assert.NoError(t, err, "error GetRecentAnimeListRaw")
-	bl, err = GetAnimeList(crawler, tl)
-	assert.NoError(t, err, "error GetLatestAnimeList")
-	assert.True(t, len(bl) > 0)
+	processTorrentListFunc := func(torrentList []interface{}) {
+		al, err := GetAnimeList(crawler, torrentList)
+		assert.NoError(t, err, "we must process the torrent list")
+		assert.True(t, len(al) > 0, "we must process at least one torrent successfully")
+	}
+	// test get latest
+	tl, err := crawler.GetAnimeListRawByTag("", 1)
+	assert.NoError(t, err, "Call the api to return a list of torrent")
+	processTorrentListFunc(tl)
+	// test get list with keyword
+	tags, err := crawler.GetTagByKeyWord("lycoris")
+	assert.NoError(t, err, "can not get tag for a torrent")
+	assert.True(t, len(tags) > 0, "result must contains at least one tag")
+	tl, err = crawler.GetAnimeListRawByTag(tags[0], 1)
+	assert.NoError(t, err, "Call the api to return at least one tag")
+	processTorrentListFunc(tl)
 }
 
 func TestGetAnimeNameList(t *testing.T) {
 	crawler := NewBangumi(client, kvStorage)
-	tl, err := crawler.GetAnimeListRaw(1)
+	tl, err := crawler.GetAnimeListRawByTag("", 1)
 	assert.NoError(t, err, "error GetLatestAnimeListRaw")
 	bl := GetAnimeNameList(crawler, tl)
-	assert.True(t, len(bl) > 0)
-	tl, err = crawler.GetRecentAnimeListRaw()
-	assert.NoError(t, err, "error GetRecentAnimeListRaw")
-	bl = GetAnimeNameList(crawler, tl)
 	assert.True(t, len(bl) > 0)
 }
 
