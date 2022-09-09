@@ -3,7 +3,6 @@ package crawler
 import (
 	"crawler/bangumi/dao"
 	"crawler/qbt"
-	"github.com/pkg/errors"
 	"log"
 	"os"
 	"time"
@@ -14,7 +13,7 @@ func ScanBangumiTorrent(bgm Bangumi, postTorrentFunc func(*dao.BangumiTorrentInf
 	// init crawler
 	for i := 1; i < 5; i++ {
 		log.Printf("scanning page %d", i)
-		tl, err := bgm.GetAnimeListRawByTag("", i)
+		tl, err := bgm.GetAnimeListRawByTag(nil, i)
 		if err != nil {
 			return err
 		}
@@ -32,22 +31,23 @@ func ScanBangumiTorrent(bgm Bangumi, postTorrentFunc func(*dao.BangumiTorrentInf
 	return nil
 }
 
-func CrawlAllTorrents(bgm Bangumi, keyword string, postTorrentFunc func(*dao.BangumiTorrentInfo)) error {
+func CrawlAllTorrents(bgm Bangumi, keywords []string, postTorrentFunc func(*dao.BangumiTorrentInfo)) error {
 	// init crawler
-	var tag string
-	{
-		tags, err := bgm.GetTagByKeyWord(keyword)
+	var tags []string
+	for _, keyword := range keywords {
+		res, err := bgm.GetTagByKeyWord(keyword)
 		if err != nil {
 			return err
 		}
-		if len(tags) == 0 {
-			return errors.New("no valid search result")
+		if len(res) == 0 {
+			log.Printf("no valid search result for keyword: %s", keyword)
+			continue
 		}
-		tag = tags[0]
+		tags = append(tags, res[0])
 	}
 	for i := 1; ; i++ {
 		log.Printf("scanning page %d", i)
-		tl, err := bgm.GetAnimeListRawByTag(tag, i)
+		tl, err := bgm.GetAnimeListRawByTag(tags, i)
 		if err != nil {
 			return err
 		}
@@ -65,6 +65,8 @@ func CrawlAllTorrents(bgm Bangumi, keyword string, postTorrentFunc func(*dao.Ban
 		time.Sleep(time.Second * 10)
 	}
 	log.Println("all torrent finished scanning, return")
+	log.Println("wait 600 sec to recheck")
+	time.Sleep(time.Second * 600)
 	return nil
 }
 

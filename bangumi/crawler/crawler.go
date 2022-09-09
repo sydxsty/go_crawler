@@ -13,7 +13,7 @@ import (
 
 type Bangumi interface {
 	GetTagByKeyWord(keyword string) ([]string, error)
-	GetAnimeListRawByTag(tag string, page int) ([]interface{}, error)
+	GetAnimeListRawByTag(tags []string, page int) ([]interface{}, error)
 	GetMiscByTags(ids ...string) []map[string]interface{}
 	GetUserNameByTag(ids ...string) []map[string]interface{}
 	GetTeamByTag(ids ...string) []map[string]interface{}
@@ -113,19 +113,19 @@ func (b *BangumiImpl) GetTagByKeyWord(keyword string) ([]string, error) {
 	return ids, nil
 }
 
-func (b *BangumiImpl) GetAnimeListRawByTag(tag string, page int) ([]interface{}, error) {
+func (b *BangumiImpl) GetAnimeListRawByTag(tags []string, page int) ([]interface{}, error) {
 	if page <= 0 {
 		return nil, errors.Errorf("error page index, %d.", page)
 	}
 	var processFunc func() (*colly.Response, error)
-	if tag == "" {
+	if tags == nil {
 		processFunc = func() (*colly.Response, error) {
 			return b.client.SyncVisit(`api/torrent/page/` + strconv.Itoa(page))
 		}
 	} else {
 		processFunc = func() (*colly.Response, error) {
 			return b.client.SyncPostJson(`api/torrent/search`, map[string]interface{}{
-				"tag_id": []string{tag},
+				"tag_id": tags,
 				"p":      page,
 			})
 		}

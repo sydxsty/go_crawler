@@ -57,6 +57,7 @@ func NewPoster() *Poster {
 func main() {
 	p := NewPoster()
 	for {
+		//err := crawler.CrawlAllTorrents(p.bgm, []string{"喵萌奶茶屋", "异世界舅舅"}, p.BGMSearchCallback)
 		err := crawler.ScanBangumiTorrent(p.bgm, p.BGMSearchCallback)
 		if err != nil {
 			log.Println("can not load bangumi latest torrents")
