@@ -33,6 +33,9 @@ type TorrentPoster interface {
 	SetCommentContent(texts ...string)
 }
 
+// ErrNoRetry Unable to republish due to issues such as torrents already published or containing violating keywords
+var ErrNoRetry = errors.New("Torrent cannot publish.")
+
 type TorrentPosterImpl struct {
 	client neubt.Client
 
@@ -237,7 +240,8 @@ func (t *TorrentPosterImpl) PostTorrentMultiPart(data []byte) (string, error) {
 		return "", err
 	}
 	if strings.Contains(resp.Request.URL.Path, "forum.php") {
-		return "", errors.New("error publish torrent")
+		// Unable to republish due to issues such as torrents already published or containing violating keywords
+		return "", ErrNoRetry
 	}
 	return resp.Request.URL.Path, nil
 }

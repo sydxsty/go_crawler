@@ -212,7 +212,7 @@ func (b *BangumiTorrentInfo) SetJPNName(name string) {
 }
 
 func (b *BangumiTorrentInfo) GetTorrentContent() string {
-	str, err := b.content.PrintToString(20)
+	str, err := b.content.PrintToString(-1)
 	if err != nil {
 		log.Println(err)
 		return ""
