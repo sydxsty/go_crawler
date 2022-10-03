@@ -190,9 +190,17 @@ func (t *TorrentPosterImpl) SetTitle(pieces ...string) {
 		if len(piece) == 0 {
 			continue
 		}
+		if len(UTF82GB2312(piece)) > 250 {
+			continue
+		}
 		title += "[" + piece + "]"
 	}
-	t.subject = title
+	if len(UTF82GB2312(title)) > 254 {
+		t.SetTitle(pieces[:len(pieces)-1]...)
+		return
+	} else {
+		t.subject = title
+	}
 }
 
 func (t *TorrentPosterImpl) getMessageBody() string {

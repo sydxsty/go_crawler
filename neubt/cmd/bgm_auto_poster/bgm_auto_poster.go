@@ -10,6 +10,7 @@ import (
 
 func main() {
 	p := NewPoster()
+	// p.bgmTrMgr.ResetTorrentPostedState("57a0f3fc82cd09c1ca419a654c74c6e96f11d46e")
 	for {
 		// KeyWordCrawler(p)
 		DefaultIndexCrawler(p)

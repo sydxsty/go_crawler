@@ -52,6 +52,14 @@ func (t *TorrentManager) TorrentIsPosted(animeInfoHash string) bool {
 	return v
 }
 
+func (t *TorrentManager) ResetTorrentPostedState(animeInfoHash string) bool {
+	err := t.setState(animeInfoHash, "posted", false)
+	if err != nil {
+		return false
+	}
+	return true
+}
+
 func (t *TorrentManager) SetTorrentPostedState(animeInfoHash string) bool {
 	err := t.setState(animeInfoHash, "posted", true)
 	if err != nil {
