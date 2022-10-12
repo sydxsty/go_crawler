@@ -3,21 +3,14 @@ package bgmtv
 import (
 	"crawler/util"
 	"github.com/gocolly/colly/v2"
-	"github.com/pkg/errors"
-	"time"
 )
 
 type APIClientImpl struct {
 	util.ClientBase // parent
-	retry           int
-	span            time.Duration
 }
 
 func NewAPIClient() (Client, error) {
-	client := &APIClientImpl{
-		retry: 3,
-		span:  3,
-	}
+	client := &APIClientImpl{}
 	var err error
 	client.ClientBase, err = util.NewClientBase(client, "https://api.bgm.tv")
 	if err != nil {
@@ -27,23 +20,8 @@ func NewAPIClient() (Client, error) {
 	return client, nil
 }
 
-func (c *APIClientImpl) SyncVisit(link string) (*colly.Response, error) {
-	r, err := c.ClientBase.SyncVisit(link)
-	for i := 0; i < c.retry-1 && err != nil; i++ {
-		r, err = c.ClientBase.SyncVisit(link)
-	}
-	if err != nil {
-		return nil, errors.Wrapf(err, "can not get link for %d times", c.retry)
-	}
-	time.Sleep(time.Second * c.span)
-	return r, nil
-}
-
 func (c *APIClientImpl) Clone() Client {
-	client := &APIClientImpl{
-		retry: c.retry,
-		span:  c.span,
-	}
+	client := &APIClientImpl{}
 	client.ClientBase = c.ClientBase.CloneBase(client)
 	client.Reset()
 	return client

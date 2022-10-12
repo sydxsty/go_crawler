@@ -65,8 +65,6 @@ func CrawlAllTorrents(bgm Bangumi, keywords []string, callback func(*dao.Bangumi
 		for _, anime := range al {
 			callback(anime)
 		}
-		log.Println("wait 10 sec to continue")
-		time.Sleep(time.Second * 10)
 	}
 	log.Println("all torrent finished scanning, return")
 	return nil

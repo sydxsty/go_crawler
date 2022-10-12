@@ -11,7 +11,6 @@ import (
 	"log"
 	"mime/multipart"
 	"strings"
-	"time"
 )
 
 // TorrentPoster post torrent
@@ -111,7 +110,6 @@ func (t *TorrentPosterImpl) SetPTGENContent(text string) error {
 		}
 		t.aidList = append(t.aidList, aid)
 		log.Println("uploaded poster to neubt")
-		time.Sleep(time.Second * 5)
 	}
 	replaced, err := ReplaceImgWithTagID(text, t.aidList)
 	if err != nil {
@@ -131,7 +129,6 @@ func (t *TorrentPosterImpl) SetTorrentThumb(image []byte, suffix string) error {
 	}
 	t.thumbAidList = append(t.thumbAidList, aid)
 	log.Println("uploaded TorrentThumb to neubt")
-	time.Sleep(time.Second * 5)
 	t.thumbImageText += GetAIDText(aid) + "\n"
 	return nil
 }

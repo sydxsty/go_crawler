@@ -2,8 +2,11 @@ package util
 
 import (
 	"github.com/gocolly/colly/v2"
+	"github.com/pkg/errors"
+	"log"
 	"net/http"
 	"net/url"
+	"time"
 )
 
 // Client is used to call client
@@ -48,11 +51,16 @@ type ClientBaseImpl struct {
 	child     ClientBase
 	collector *colly.Collector
 	domain    *url.URL
+	retry     int
+	span      time.Duration // sleep between operations
 }
 
 // NewClientBase return a new ClientBase, called by constructor of child Client
 func NewClientBase(child ClientBase, link string) (ClientBase, error) {
-	client := &ClientBaseImpl{}
+	client := &ClientBaseImpl{
+		retry: 3,
+		span:  3,
+	}
 	client.collector = colly.NewCollector(
 		colly.UserAgent("Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 UBrowser/6.2.4098.3 Safari/537.36"),
 		colly.AllowURLRevisit(),
@@ -76,14 +84,34 @@ func (c *ClientBaseImpl) SetResponseCallback(callback func(r *colly.Response)) {
 	c.collector.OnResponse(callback)
 }
 
-func (c *ClientBaseImpl) Visit(link string) error {
+func (c *ClientBaseImpl) callWithRetryAndDelay(callable func() error) error {
 	defer c.child.Reset()
-	return c.collector.Visit(MustGetAbsoluteURL(c.domain, link))
+	var err error
+	for i := 0; i < c.retry; i++ {
+		err = callable()
+		time.Sleep(time.Second * c.span)
+		if err == nil {
+			log.Println("Page crawled successfully.")
+			break
+		}
+		log.Println("An error occurred when crawling pages, ", err)
+	}
+	if err != nil {
+		return errors.Wrapf(err, "can not get link for %d times", c.retry)
+	}
+	return nil
+}
+
+func (c *ClientBaseImpl) Visit(link string) error {
+	return c.callWithRetryAndDelay(func() error {
+		return c.collector.Visit(MustGetAbsoluteURL(c.domain, link))
+	})
 }
 
 func (c *ClientBaseImpl) Post(link string, requestData map[string]string) error {
-	defer c.child.Reset()
-	return c.collector.Post(MustGetAbsoluteURL(c.domain, link), requestData)
+	return c.callWithRetryAndDelay(func() error {
+		return c.collector.Post(MustGetAbsoluteURL(c.domain, link), requestData)
+	})
 }
 
 func (c *ClientBaseImpl) SyncVisit(link string) (*colly.Response, error) {
@@ -124,6 +152,8 @@ func (c *ClientBaseImpl) CloneBase(child ClientBase) ClientBase {
 		child:     child,
 		collector: c.collector,
 		domain:    c.domain,
+		retry:     c.retry,
+		span:      c.span,
 	}
 	return client
 }

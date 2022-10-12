@@ -31,7 +31,7 @@ func main() {
 func DefaultIndexCrawler(p *Poster) {
 	err := crawler.ScanBangumiTorrent(p.bgm, p.BGMSearchCallback)
 	if err != nil {
-		log.Println("can not load bangumi latest torrents")
+		log.Println("can not load bangumi latest torrents, retry after 60 sec.")
 		time.Sleep(time.Second * 60)
 	}
 }
@@ -137,7 +137,6 @@ func (p *Poster) BGMSearchCallback(ti *dao.BangumiTorrentInfo) {
 		return
 	}
 	// 3. re-download the torrent from neubt
-	time.Sleep(time.Second * 5)
 	err = p.DownloadTorrentFromNeubt(url)
 	if err != nil {
 		log.Println("failed to download post torrent to neu bt: ", err)
@@ -180,8 +179,6 @@ func (p *Poster) PostTorrentToNeubt(ti *dao.BangumiTorrentInfo, description stri
 	if err != nil {
 		return "", errors.Wrap(err, "failed to load torrent from disk")
 	}
-	// wait for 5 second
-	time.Sleep(time.Second * 5)
 	link, err := poster.PostTorrentMultiPart(data)
 	// mark the torrent posted
 	if err == nil {
