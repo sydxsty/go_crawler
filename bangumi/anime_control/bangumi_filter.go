@@ -11,6 +11,7 @@ type BangumiFilter struct {
 	defaultDelimiter string
 	coarseDelimiter  string
 	seasonRegexp     *regexp.Regexp
+	seasonFinished   []*regexp.Regexp
 	movieRegexp      *regexp.Regexp
 	teamRegexp       *regexp.Regexp
 	resolutionRegexp *regexp.Regexp
@@ -20,7 +21,7 @@ type BangumiFilter struct {
 func NewBangumiFilter() *BangumiFilter {
 	bf := &BangumiFilter{
 		multiEpisode:     regexp.MustCompile(`[ 【\[第]([0-9]{1,2}-[0-9]{1,2}) ?(?i)(END|Fin|合集)?[】\]+ 话話集]`),
-		singleEpisode:    regexp.MustCompile(`[ 【\[第]([0-9]{1,4}([Vv][2-9])?)[】\[\]+ 话話集]`),
+		singleEpisode:    regexp.MustCompile(`[ 【\[第]([0-9]{1,4}([Vv.][2-9])?)[】\[\]+ 话話集]`),
 		defaultDelimiter: " []&/+【】()（）",
 		coarseDelimiter:  "[]/()【】",
 		seasonRegexp:     regexp.MustCompile(`([sS](0|)[0-9]+)|第.季|第.期`),
@@ -31,6 +32,10 @@ func NewBangumiFilter() *BangumiFilter {
 		resolutionRegexp: regexp.MustCompile("[0-9]{3,}[pPiI]|[24][kK]|[0-9]{3,4}[xX][0-9]{3,4}"),
 		mediaInfoRegexp:  regexp.MustCompile("(?i)(AVC|HEVC|AAC|WebRip|TVrip|MP4|MKV|WEB-DL|BDRip|[0-9]+-?bit|Ma10|Hi10|FLAC|BDMV|M2TS|x264|x265)"),
 	}
+	// [0] 在集数里面找看起来像完结的字符串
+	// [1] 在标题里面找看起来像完结的字符串
+	bf.seasonFinished = append(bf.seasonFinished, regexp.MustCompile(`0?1-[1-2][0-9]`))
+	bf.seasonFinished = append(bf.seasonFinished, regexp.MustCompile(`[ \[\]&/+【】()（）0-9](?i)(END|Fin|合集|全集)[ \[\]&/+【】()（）]`))
 	return bf
 }
 
@@ -40,22 +45,17 @@ func (bf *BangumiFilter) CoarseSplit(title string) []string {
 }
 
 // GetMultiEpisode return true if the episode is finished
-func (bf *BangumiFilter) GetMultiEpisode(episode string) (string, bool) {
-	str := bf.multiEpisode.FindStringSubmatch(episode)
+func (bf *BangumiFilter) GetMultiEpisode(title string) (string, bool) {
+	// Additional check if it contains finished substring
+	finished := bf.seasonFinished[1].MatchString(title)
+	str := bf.multiEpisode.FindStringSubmatch(title)
 	if str == nil {
-		return "", false
+		return "", finished
 	}
-	// check is season finished
-	finStr := str[2]
-	if len(finStr) != 0 {
-		return str[1], true
-	}
-	// Additional check if it is a complete set (01-12, 01-13, 01-24)
-	finLikeMap := map[string]interface{}{"01-12": nil, "01-13": nil, "01-24": nil}
-	if _, ok := finLikeMap[str[1]]; ok {
-		return str[1], true
-	}
-	return str[1], false
+	// Check if season is finished
+	// Additional check if it is a complete set (01-XX, 1-XX)
+	finished = finished || (len(str[2]) != 0) || bf.seasonFinished[0].MatchString(str[1])
+	return str[1], finished
 }
 
 func (bf *BangumiFilter) GetSingleEpisode(episode string) string {

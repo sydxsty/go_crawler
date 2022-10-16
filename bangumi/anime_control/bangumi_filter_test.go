@@ -163,5 +163,10 @@ func init() {
 		"[喵萌奶茶屋&VCB-Studio] Bokutachi wa Benkyō ga Dekinai / 我们无法一起学习 / ぼくたちは勉強ができない 10-bit 1080p HEVC BDRip [S1 + S2 + OVA Fin]",
 		"[BDMV][220225][Words Worth Blu-ray Archive BOX SPECIAL EDITION][JP]",
 		"【喵萌奶茶屋】★04月新番★[恋爱要在征服世界后/Koi wa Sekai Seifuku no Ato de][01-12+SP][1080p][简日双语][招募翻译]",
+		"【幻樱字幕组】【4月新番】【夏日重现 Summer Time Rendering】【1-25】【GB_MP4】【1920X1080】【合集】",
+		"[桜都字幕组] 四叠半时光机布鲁斯 / Yojouhan Time Machine Blues [13.5][1080p][简体内嵌]",
+		"【动漫国字幕组】★07月新番[欢迎来到实力至上主义的教室 第二季][01-13(全集)][1080P][简体][MP4]",
+		"【幻樱字幕组】【邪神与厨二病少女X Jashin-chan Dropkick X】【01~12】【GB_MP4】【1920X1080】【合集】",
+		"[爱恋&漫猫字幕组] 欢迎来到实力至上主义的教室 (01-13Fin WEBRIP 1080p AVC AAC MP4 2022年7月 简中)",
 	}
 }
